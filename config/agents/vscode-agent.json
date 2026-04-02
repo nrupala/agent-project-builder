@@ -1,0 +1,27 @@
+{
+  "name": "vscode-agent",
+  "description": "VS Code integrated agent for project building - 100% local with locally stored model",
+  "model": {
+    "provider": "lmstudio",
+    "model": "lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF",
+    "temperature": 0.7,
+    "maxTokens": 2000
+  },
+  "capabilities": [
+    "code-generation",
+    "file-creation",
+    "terminal-integration",
+    "debugging-assistance",
+    "local-processing"
+  ],
+  "tools": ["read", "write", "edit", "bash", "glob", "grep"],
+  "behavior": {
+    "autoCommit": true,
+    "runTests": true,
+    "lintBeforeCommit": true,
+    "maxIterations": 10,
+    "vscodeIntegration": true,
+    "localOnly": true
+  },
+  "notes": "This agent runs entirely locally using models stored in LM Studio or Ollama. No external API calls are made."
+}

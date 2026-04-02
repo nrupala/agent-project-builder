@@ -1,0 +1,44 @@
+Example Project Requests for the OpenCode Agent
+
+1. Web Applications
+- "Create a React e-commerce site with product catalog, shopping cart, and user authentication"
+- "Build a Vue.js dashboard for displaying real-time stock market data with charts"
+- "Create a simple HTML/CSS/JavaScript personal portfolio site with contact form"
+
+2. APIs and Backends
+- "Create a REST API for a blog using Node.js, Express, and MongoDB"
+- "Build a GraphQL server for a task management system with user authentication"
+- "Create a Python Flask API for a weather service that integrates with OpenWeatherMap"
+
+3. Mobile Applications
+- "Create a React Native fitness tracker app with exercise logging and progress charts"
+- "Build an Ionic app for restaurant menu browsing with online ordering"
+
+4. Command Line Tools
+- "Create a CLI tool for converting markdown files to PDF with custom styling"
+- "Build a file organizer that sorts files into folders based on file type and date"
+
+5. Libraries and Packages
+- "Create a JavaScript library for form validation with support for async validation rules"
+- "Build a Python package for interacting with a specific REST API with retry logic"
+
+6. Data Processing
+- "Create a Python script for cleaning and analyzing CSV data with visualization"
+- "Build a Node.js service for processing JSON logs and generating summary reports"
+
+7. Games
+- "Create a simple 2D game using HTML5 Canvas and JavaScript"
+- "Build a text-based adventure game with Python"
+
+8. DevOps and Infrastructure
+- "Create a Docker Compose setup for a microservices architecture with nginx reverse proxy"
+- "Build a set of GitHub Actions workflows for CI/CD of a Node.js application"
+
+Each request can be processed with:
+node src/index.js -r "[request]" [options]
+
+Options include:
+-a <agent-type>    Specify agent type (default, vscode-agent)
+-m <provider>      Specify model provider (openai, lmstudio, ollama)
+-l                 Use local-only mode (no external API calls)
+-i                 Start interactive mode instead of processing a single request

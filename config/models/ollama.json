@@ -1,0 +1,22 @@
+{
+  "name": "ollama",
+  "type": "local",
+  "endpoint": "http://localhost:11434/v1",
+  "models": [
+    {
+      "name": "llama2:7b",
+      "contextLength": 4096
+    },
+    {
+      "name": "codellama:7b-instruct",
+      "contextLength": 4096
+    },
+    {
+      "name": "mistral:7b-instruct",
+      "contextLength": 4096
+    }
+  ],
+  "defaultModel": "codellama:7b-instruct",
+  "temperature": 0.7,
+  "maxTokens": 2000
+}

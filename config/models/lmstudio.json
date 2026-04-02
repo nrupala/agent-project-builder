@@ -1,0 +1,19 @@
+{
+  "name": "lmstudio",
+  "type": "local",
+  "endpoint": "http://localhost:1234/v1",
+  "apiKey": "not-needed",
+  "models": [
+    {
+      "name": "lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF",
+      "contextLength": 8192
+    },
+    {
+      "name": "TheBloke/Mistral-7B-Instruct-v0.1-GGUF",
+      "contextLength": 8192
+    }
+  ],
+  "defaultModel": "lmstudio-community/Meta-Llama-3-8B-Instruct-GGUF",
+  "temperature": 0.7,
+  "maxTokens": 2000
+}

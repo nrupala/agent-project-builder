@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Project Builder</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        .tagline {
+            margin-top: 0.5rem;
+            opacity: 0.9;
+            font-size: 1.2rem;
+        }
+        section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+        h2 {
+            color: #5a67d8;
+            margin-top: 0;
+        }
+        code {
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        pre {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        .feature-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 3px solid #667eea;
+        }
+        .feature-card h3 {
+            margin-top: 0;
+            color: #2d3748;
+        }
+        .btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #5a67d8;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Agent Project Builder</h1>
+        <p class="tagline">AI-powered software project generation from natural language</p>
+    </header>
+
+    <section>
+        <h2>What is Agent Project Builder?</h2>
+        <p>
+            Agent Project Builder is an autonomous AI agent system that generates complete software projects from natural language descriptions. 
+            Simply describe what you want to build, and our AI agents will create the project structure, write the code, configure dependencies, 
+            and set up everything you need to get started.
+        </p>
+    </section>
+
+    <section>
+        <h2>Key Features</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>🤖 AI-Powered Generation</h3>
+                <p>Turn natural language descriptions into complete, working software projects using advanced language models.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🔒 100% Local Operation</h3>
+                <p>Run entirely offline using locally stored models from LM Studio or Ollama - no external API calls required.</p>
+            </div>
+            <div class="feature-card">
+                <h3>⚡ Multiple AI Backends</h3>
+                <p>Supports OpenAI (cloud), LM Studio (local), Ollama (local), and VS Code agents for flexible deployment options.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🛠️ Complete Project Generation</h3>
+                <p>Generates full project structures with proper dependencies, configurations, documentation, and build tools.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🧪 Integrated Testing</h3>
+                <p>Automatically runs tests and linting to ensure generated code quality before delivery.</p>
+            </div>
+            <div class="feature-card">
+                <h3>📦 Cross-Platform</h3>
+                <p>Available as standalone executables for Windows, macOS, and Linux, plus Node.js package for developers.</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Getting Started</h2>
+        <h3>Installation</h3>
+        <pre><code># Clone the repository
+git clone https://github.com/yourusername/agent-project-builder.git
+cd agent-project-builder
+
+# Install dependencies
+npm install
+
+# Configure your environment (create .env file)
+echo "OPENAI_API_KEY=your_key_here" > .env
+# Or for local-only mode:
+echo "LOCAL_ONLY=true" > .env
+echo "MODEL_PROVIDER=lmstudio" >> .env
+</code></pre>
+
+        <h3>Usage Examples</h3>
+        <pre><code># Create a web API from description
+node src/index.js -r "Create a REST API for a blog with Node.js and Express"
+
+# Build a mobile app with local models only
+node src/index.js -r "Create a fitness tracking app with React Native" -a vscode-agent -m ollama -l
+
+# Start interactive mode
+node src/index.js --interactive
+</code></pre>
+    </section>
+
+    <section>
+        <h2>Supported Project Types</h2>
+        <ul>
+            <li><strong>Web Applications:</strong> React, Vue, HTML/CSS/JS, Next.js, etc.</li>
+            <li><strong>APIs and Backends:</strong> Node.js/Express, Python/Flask, Python/FastAPI, Java/Spring, etc.</li>
+            <li><strong>Mobile Applications:</strong> React Native, Ionic, Flutter, etc.</li>
+            <li><strong>Command Line Tools:</strong> Node.js CLI, Python CLI, Rust CLI, etc.</li>
+            <li><strong>Libraries and Packages:</strong> npm packages, Python packages, etc.</li>
+            <li><strong>Data Processing:</strong> ETL pipelines, data analysis scripts, etc.</li>
+            <li><strong>Games:</strong> 2D canvas games, text adventures, etc.</li>
+            <li><strong>DevOps:</strong> Docker configurations, CI/CD pipelines, infrastructure as code, etc.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Download</h2>
+        <p>
+            Get the latest version from the <a href="https://github.com/yourusername/agent-project-builder/releases">GitHub Releases</a> page.
+            Standalone executables are available for Windows, macOS, and Linux.
+        </p>
+        <a href="https://github.com/yourusername/agent-project-builder/releases" class="btn">Download Releases</a>
+    </section>
+
+    <footer class="footer">
+        <p>Built with ❤️ using OpenCode workflow</p>
+        <p>&copy; 2026 Agent Project Builder. MIT Licensed.</p>
+    </footer>
+</body>
+</html>
