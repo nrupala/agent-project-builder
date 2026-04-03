@@ -1,10 +1,12 @@
-import { AgentOrchestrator } from './agentOrchestrator.js';
+import { fileURLToPath } from 'url';
+import path from 'path';
+import fs from 'fs';
 
 export class CLI {
   constructor() {
     this.logger = {
-      info: (msg) => console.log(`[CLI] ${msg}`),
-      error: (msg) => console.error(`[CLI] ${msg}`)
+      info: (msg) => console.log('[CLI] ' + msg),
+      error: (msg) => console.error('[CLI] ' + msg)
     };
   }
 
@@ -15,7 +17,9 @@ export class CLI {
       options: {},
       help: false,
       version: false,
-      interactive: false
+      interactive: false,
+      server: false,
+      port: null
     };
 
     for (let i = 0; i < args.length; i++) {
@@ -33,6 +37,19 @@ export class CLI {
         case '--interactive':
         case '-i':
           result.interactive = true;
+          break;
+        case '--server':
+        case '-s':
+          result.server = true;
+          break;
+        case '--port':
+        case '-p':
+          if (i + 1 < args.length) {
+            result.port = parseInt(args[++i], 10);
+          } else {
+            this.logger.error('Missing value for --port option');
+            process.exit(1);
+          }
           break;
         case '--request':
         case '-r':
@@ -66,11 +83,10 @@ export class CLI {
           result.options.localOnly = true;
           break;
         default:
-          // If it doesn't start with '-', treat it as the request
           if (!arg.startsWith('-')) {
             result.request = arg;
           } else {
-            this.logger.warn(`Unknown option: ${arg}`);
+            this.logger.warn('Unknown option: ' + arg);
           }
           break;
       }
@@ -80,33 +96,41 @@ export class CLI {
   }
 
   showHelp() {
-    console.log(`
-  OpenCode Agent Project Builder
-
-  Usage:
-    node src/index.js [options] [request]
-
-  Options:
-    -h, --help           Show help message
-    -v, --version        Show version information
-    -i, --interactive    Start interactive mode
-    -r, --request <req>  Specify project request directly
-    -a, --agent-type <t> Specify agent type (default, vscode-agent, etc.)
-    -m, --model-provider <p> Specify model provider (openai, lmstudio, ollama)
-    -l, --local-only     Use only local models (no external API calls)
-
-  Examples:
-    node src/index.js "Create a REST API for a blog with Node.js and Express"
-    node src/index.js -r "Build a React todo app" -a vscode-agent -m lmstudio -l
-    node src/index.js --interactive
-  `);
+    console.log('');
+    console.log('  OpenCode Agent Project Builder v1.0.0');
+    console.log('');
+    console.log('  Usage:');
+    console.log('    node src/index.js [options] [request]');
+    console.log('');
+    console.log('  Modes:');
+    console.log('    CLI Mode (default)    Build projects from command line');
+    console.log('    Server Mode (--server) Start web GUI + API server');
+    console.log('');
+    console.log('  Options:');
+    console.log('    -h, --help              Show help message');
+    console.log('    -v, --version           Show version information');
+    console.log('    -i, --interactive       Start interactive CLI mode');
+    console.log('    -s, --server            Start web GUI server');
+    console.log('    -p, --port <port>       Server port (default: 3000)');
+    console.log('    -r, --request <req>     Specify project request');
+    console.log('    -a, --agent-type <t>    Specify agent type');
+    console.log('    -m, --model-provider <p> Specify model provider');
+    console.log('    -l, --local-only        Use only local models');
+    console.log('');
+    console.log('  Examples:');
+    console.log('    node src/index.js -s                          # Start web GUI');
+    console.log('    node src/index.js -s -p 8080                  # Start GUI on port 8080');
+    console.log('    node src/index.js "Create a REST API"         # CLI build');
+    console.log('    node src/index.js -r "Build a React app" -l   # CLI with local models');
+    console.log('    node src/index.js --interactive               # Interactive mode');
+    console.log('');
   }
 
   showVersion() {
-    const packageJsonPath = './package.json';
     try {
-      const packageJson = require(packageJsonPath);
-      console.log(`OpenCode Agent Project Builder v${packageJson.version}`);
+      const pkgPath = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'package.json');
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+      console.log('OpenCode Agent Project Builder v' + pkg.version);
     } catch (error) {
       console.log('OpenCode Agent Project Builder v1.0.0');
     }

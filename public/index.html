@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Project Builder</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --red: #f85149; --orange: #d29922;
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; }
+header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+header h1 { font-size: 16px; font-weight: 600; }
+header .badge { background: var(--accent); color: #000; font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-left: auto; }
+.status-dot.disconnected { background: var(--red); }
+main { display: flex; flex: 1; overflow: hidden; }
+.chat-panel { width: 420px; min-width: 320px; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px; }
+.chat-messages::-webkit-scrollbar { width: 6px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.message { margin-bottom: 12px; padding: 10px 14px; border-radius: 8px; max-width: 95%; }
+.message.system { background: var(--surface); border: 1px solid var(--border); }
+.message.user { background: #1f6feb22; border: 1px solid #1f6feb44; margin-left: auto; }
+.message.assistant { background: var(--surface); border-left: 3px solid var(--accent); }
+.message.error { background: #f8514922; border-left: 3px solid var(--red); }
+.message .label { font-size: 10px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.message .content { font-size: 13px; line-height: 1.5; }
+.message code { background: var(--bg); padding: 1px 5px; border-radius: 3px; font-family: var(--font-mono); font-size: 12px; }
+.settings-bar { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap; }
+.settings-bar select { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12px; }
+.settings-bar select:focus { outline: none; border-color: var(--accent); }
+.input-area { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+.input-area textarea { flex: 1; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 13px; resize: none; height: 44px; font-family: inherit; }
+.input-area textarea:focus { outline: none; border-color: var(--accent); }
+.input-area button { background: var(--accent); color: #000; border: none; border-radius: 8px; padding: 0 20px; font-weight: 600; cursor: pointer; font-size: 13px; }
+.input-area button:disabled { opacity: 0.5; cursor: not-allowed; }
+.right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.progress-bar { height: 3px; background: var(--border); }
+.progress-bar .fill { height: 100%; background: var(--accent); transition: width 0.3s; width: 0%; }
+.tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); }
+.tab { padding: 10px 16px; font-size: 12px; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); }
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--text); border-bottom-color: var(--accent); }
+.file-tree { width: 220px; border-right: 1px solid var(--border); overflow-y: auto; padding: 8px; font-size: 12px; }
+.file-tree::-webkit-scrollbar { width: 4px; }
+.file-tree::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.tree-item { padding: 4px 8px; cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 6px; }
+.tree-item:hover { background: var(--border); }
+.tree-item.active { background: #1f6feb33; }
+.tree-item .icon { font-size: 14px; }
+.tree-dir { font-weight: 600; }
+.code-viewer { flex: 1; overflow: auto; background: var(--bg); }
+.code-viewer pre { padding: 16px; font-family: var(--font-mono); font-size: 12px; line-height: 1.6; overflow-x: auto; white-space: pre; color: var(--text); }
+.download-btn { position: fixed; bottom: 20px; right: 20px; background: var(--green); color: #000; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 600; cursor: pointer; font-size: 13px; display: none; }
+.download-btn.visible { display: block; }
+.empty-state { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--muted); font-size: 14px; flex-direction: column; gap: 8px; }
+.empty-state .icon { font-size: 48px; opacity: 0.3; }
+.logs-panel { flex: 1; overflow-y: auto; padding: 12px; font-family: var(--font-mono); font-size: 12px; }
+.log-entry { padding: 3px 0; color: var(--muted); }
+.log-entry .phase { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Agent Project Builder</h1>
+  <span class="badge">v1.0.0</span>
+  <div class="status-dot" id="statusDot"></div>
+</header>
+
+<main>
+  <div class="chat-panel">
+    <div class="chat-messages" id="chatMessages">
+      <div class="message system">
+        <div class="label">System</div>
+        <div class="content">Describe the project you want to build. The AI agent will analyze, plan, and generate all files automatically.</div>
+      </div>
+    </div>
+    <div class="settings-bar">
+      <select id="providerSelect">
+        <option value="lmstudio">LM Studio</option>
+        <option value="ollama">Ollama</option>
+        <option value="openai">OpenAI</option>
+      </select>
+      <select id="agentSelect">
+        <option value="default">Default Agent</option>
+      </select>
+    </div>
+    <div class="input-area">
+      <textarea id="inputField" placeholder="Describe your project..." rows="1"></textarea>
+      <button id="sendBtn" onclick="sendRequest()">Build</button>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="progress-bar"><div class="fill" id="progressFill"></div></div>
+    <div class="tabs">
+      <div class="tab active" data-tab="files" onclick="switchTab('files')">Files</div>
+      <div class="tab" data-tab="code" onclick="switchTab('code')">Code</div>
+      <div class="tab" data-tab="logs" onclick="switchTab('logs')">Logs</div>
+    </div>
+    <div style="display:flex;flex:1;overflow:hidden;">
+      <div class="file-tree" id="fileTree">
+        <div class="empty-state"><div class="icon">&#128193;</div>No files yet</div>
+      </div>
+      <div class="code-viewer" id="codeViewer">
+        <div class="empty-state"><div class="icon">&#128196;</div>Select a file to view</div>
+      </div>
+    </div>
+    <div class="logs-panel" id="logsPanel" style="display:none;"></div>
+  </div>
+</main>
+
+<button class="download-btn" id="downloadBtn" onclick="downloadProject()">Download Project</button>
+
+<script>
+var chatMessages = document.getElementById('chatMessages');
+var inputField = document.getElementById('inputField');
+var sendBtn = document.getElementById('sendBtn');
+var statusDot = document.getElementById('statusDot');
+var progressFill = document.getElementById('progressFill');
+var fileTree = document.getElementById('fileTree');
+var codeViewer = document.getElementById('codeViewer');
+var downloadBtn = document.getElementById('downloadBtn');
+var logsPanel = document.getElementById('logsPanel');
+
+var ws = null;
+var currentSession = null;
+var generatedFiles = [];
+var currentTab = 'files';
+var currentFile = null;
+var sessionLogs = [];
+
+function connect() {
+  var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(protocol + '//' + location.host);
+  ws.onopen = function() { statusDot.classList.remove('disconnected'); addMessage('system', 'Connected to Agent server'); };
+  ws.onclose = function() { statusDot.classList.add('disconnected'); addMessage('error', 'Disconnected. Reconnecting...'); setTimeout(connect, 3000); };
+  ws.onmessage = function(event) {
+    var msg = JSON.parse(event.data);
+    handleServerMessage(msg);
+  };
+}
+
+function addMessage(type, content) {
+  var div = document.createElement('div');
+  div.className = 'message ' + type;
+  var labels = { system: 'System', user: 'You', assistant: 'Agent', error: 'Error' };
+  div.innerHTML = '<div class="label">' + (labels[type] || type) + '</div><div class="content">' + content + '</div>';
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function addLog(phase, message) {
+  sessionLogs.push({ phase: phase, message: message });
+  if (currentTab === 'logs') {
+    renderLogs();
+  }
+}
+
+function renderLogs() {
+  logsPanel.innerHTML = sessionLogs.map(function(l) {
+    return '<div class="log-entry"><span class="phase">[' + l.phase + ']</span> ' + escapeHtml(l.message) + '</div>';
+  }).join('');
+  logsPanel.scrollTop = logsPanel.scrollHeight;
+}
+
+function handleServerMessage(msg) {
+  if (msg.sessionId !== currentSession && currentSession) return;
+  switch (msg.phase) {
+    case 'analysis':
+      addMessage('assistant', msg.status);
+      addLog('analysis', msg.status);
+      progressFill.style.width = '15%';
+      break;
+    case 'planning':
+      addMessage('assistant', msg.status);
+      addLog('planning', msg.status);
+      progressFill.style.width = '30%';
+      break;
+    case 'file':
+      if (msg.file) {
+        generatedFiles.push(msg.file);
+        updateFileTree();
+        addMessage('assistant', 'Generated: <code>' + msg.file.path + '</code>');
+        addLog('file', 'Generated ' + msg.file.path);
+      }
+      progressFill.style.width = Math.min(90, 30 + (generatedFiles.length * 5)) + '%';
+      break;
+    case 'complete':
+      addMessage('system', 'Project complete! ' + msg.fileCount + ' files generated.');
+      addLog('complete', 'Done - ' + msg.fileCount + ' files');
+      progressFill.style.width = '100%';
+      sendBtn.disabled = false;
+      downloadBtn.classList.add('visible');
+      break;
+    case 'error':
+      addMessage('error', msg.status);
+      addLog('error', msg.status);
+      progressFill.style.width = '100%';
+      progressFill.style.background = 'var(--red)';
+      sendBtn.disabled = false;
+      break;
+  }
+}
+
+function updateFileTree() {
+  if (generatedFiles.length === 0) return;
+  var tree = {};
+  generatedFiles.forEach(function(f) {
+    var parts = f.path.split('/');
+    var node = tree;
+    for (var i = 0; i < parts.length - 1; i++) {
+      if (!node[parts[i]]) node[parts[i]] = {};
+      node = node[parts[i]];
+    }
+    node[parts[parts.length - 1]] = null;
+  });
+  fileTree.innerHTML = renderTree(tree, '');
+}
+
+function renderTree(node, prefix) {
+  var html = '';
+  var entries = Object.entries(node).sort(function(a, b) {
+    if (a[1] === null && b[1] !== null) return 1;
+    if (a[1] !== null && b[1] === null) return -1;
+    return a[0].localeCompare(b[0]);
+  });
+  entries.forEach(function(entry) {
+    var name = entry[0];
+    var children = entry[1];
+    if (children === null) {
+      var icon = getFileIcon(name);
+      html += '<div class="tree-item" onclick="showFile(\'' + name + '\')"><span class="icon">' + icon + '</span>' + name + '</div>';
+    } else {
+      html += '<div class="tree-item tree-dir"><span class="icon">&#128193;</span>' + name + '</div>';
+      html += renderTree(children, prefix + '  ');
+    }
+  });
+  return html;
+}
+
+function getFileIcon(name) {
+  if (name.endsWith('.js') || name.endsWith('.ts')) return '&#128293;';
+  if (name.endsWith('.json')) return '&#128230;';
+  if (name.endsWith('.html')) return '&#127760;';
+  if (name.endsWith('.css')) return '&#127912;';
+  if (name.endsWith('.md')) return '&#128221;';
+  return '&#128196;';
+}
+
+function showFile(filename) {
+  var file = generatedFiles.find(function(f) { return f.path.endsWith(filename); });
+  if (!file) return;
+  currentFile = filename;
+  document.querySelectorAll('.tree-item').forEach(function(el) { el.classList.remove('active'); });
+  if (event && event.target) {
+    var treeItem = event.target.closest('.tree-item');
+    if (treeItem) treeItem.classList.add('active');
+  }
+  var ext = filename.split('.').pop();
+  var langClass = { js: 'javascript', ts: 'typescript', json: 'json', html: 'html', css: 'css', py: 'python', md: 'markdown' }[ext] || '';
+  codeViewer.innerHTML = '<pre><code class="' + langClass + '">' + escapeHtml(file.content) + '</code></pre>';
+  switchTab('code');
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.toggle('active', t.dataset.tab === tab); });
+  fileTree.style.display = (tab === 'files' || tab === 'code') ? '' : 'none';
+  codeViewer.style.display = tab === 'code' ? '' : 'none';
+  logsPanel.style.display = tab === 'logs' ? '' : 'none';
+  if (tab === 'logs') renderLogs();
+}
+
+async function sendRequest() {
+  var text = inputField.value.trim();
+  if (!text) return;
+  inputField.value = '';
+  inputField.style.height = '44px';
+  addMessage('user', text);
+  sendBtn.disabled = true;
+  progressFill.style.width = '5%';
+  progressFill.style.background = 'var(--accent)';
+  generatedFiles = [];
+  sessionLogs = [];
+  downloadBtn.classList.remove('visible');
+  fileTree.innerHTML = '<div class="empty-state"><div class="icon">&#128193;</div>No files yet</div>';
+  codeViewer.innerHTML = '<div class="empty-state"><div class="icon">&#128196;</div>Select a file to view</div>';
+
+  try {
+    var res = await fetch('/api/build', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        request: text,
+        agentType: document.getElementById('agentSelect').value,
+        modelProvider: document.getElementById('providerSelect').value
+      })
+    });
+    var data = await res.json();
+    currentSession = data.sessionId;
+  } catch (e) {
+    addMessage('error', 'Failed to start build: ' + e.message);
+    sendBtn.disabled = false;
+  }
+}
+
+function downloadProject() {
+  if (!currentSession) return;
+  var a = document.createElement('a');
+  a.href = '/api/download/' + currentSession;
+  a.download = 'project-' + currentSession + '.zip';
+  a.click();
+}
+
+inputField.addEventListener('input', function() {
+  inputField.style.height = 'auto';
+  inputField.style.height = Math.min(120, inputField.scrollHeight) + 'px';
+});
+inputField.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendRequest(); }
+});
+
+connect();
+</script>
+</body>
+</html>

@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { AgentOrchestrator } from '../src/agentOrchestrator.js';
 
 describe('AgentOrchestrator', () => {
@@ -8,7 +9,6 @@ describe('AgentOrchestrator', () => {
   });
 
   test('should initialize without errors', async () => {
-    // Mock the initialization methods
     orchestrator.configManager = {
       loadConfigs: jest.fn().mockResolvedValue()
     };
@@ -26,5 +26,12 @@ describe('AgentOrchestrator', () => {
     expect(orchestrator.configManager.loadConfigs).toHaveBeenCalled();
     expect(orchestrator.modelManager.initialize).toHaveBeenCalled();
     expect(orchestrator.gitManager.initRepoIfNeeded).toHaveBeenCalled();
+  });
+
+  test('should have required manager instances', () => {
+    expect(orchestrator.configManager).toBeDefined();
+    expect(orchestrator.modelManager).toBeDefined();
+    expect(orchestrator.logger).toBeDefined();
+    expect(orchestrator.gitManager).toBeDefined();
   });
 });

@@ -1,199 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agent Project Builder</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-        h1 {
-            margin: 0;
-            font-size: 2.5rem;
-        }
-        .tagline {
-            margin-top: 0.5rem;
-            opacity: 0.9;
-            font-size: 1.2rem;
-        }
-        section {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            border-left: 4px solid #667eea;
-        }
-        h2 {
-            color: #5a67d8;
-            margin-top: 0;
-        }
-        code {
-            background: #e2e8f0;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'Courier New', Courier, monospace;
-        }
-        pre {
-            background: #1a202c;
-            color: #e2e8f0;
-            padding: 1rem;
-            border-radius: 6px;
-            overflow-x: auto;
-        }
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1rem;
-        }
-        .feature-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-left: 3px solid #667eea;
-        }
-        .feature-card h3 {
-            margin-top: 0;
-            color: #2d3748;
-        }
-        .btn {
-            display: inline-block;
-            background: #667eea;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background 0.3s;
-        }
-        .btn:hover {
-            background: #5a67d8;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 3rem;
-            padding-top: 2rem;
-            border-top: 1px solid #e2e8f0;
-            color: #718096;
-            font-size: 0.9rem;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Project Builder - Build Projects with AI</title>
+<style>
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+  --green: #3fb950; --purple: #bc8cff; --orange: #d29922;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Nav */
+nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+nav .logo { font-size: 18px; font-weight: 700; }
+nav .logo span { color: var(--accent); }
+nav ul { list-style: none; display: flex; gap: 24px; }
+nav ul li a { color: var(--muted); font-size: 14px; font-weight: 500; }
+nav ul li a:hover { color: var(--text); text-decoration: none; }
+
+/* Hero */
+.hero { text-align: center; padding: 100px 24px 80px; max-width: 800px; margin: 0 auto; }
+.hero h1 { font-size: 48px; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
+.hero h1 .gradient { background: linear-gradient(135deg, var(--accent), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero p { font-size: 18px; color: var(--muted); line-height: 1.6; margin-bottom: 32px; }
+.hero .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn { padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; }
+.btn-primary { background: var(--accent); color: #000; }
+.btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.btn:hover { opacity: 0.9; text-decoration: none; }
+
+/* Features */
+.features { padding: 80px 24px; max-width: 1000px; margin: 0 auto; }
+.features h2 { text-align: center; font-size: 32px; margin-bottom: 48px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+.card .icon { font-size: 32px; margin-bottom: 12px; }
+.card h3 { font-size: 16px; margin-bottom: 8px; }
+.card p { font-size: 14px; color: var(--muted); line-height: 1.5; }
+
+/* Screenshot */
+.screenshot { padding: 40px 24px 80px; max-width: 1000px; margin: 0 auto; text-align: center; }
+.screenshot h2 { font-size: 32px; margin-bottom: 32px; }
+.mockup { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; text-align: left; }
+.mockup-bar { background: var(--border); padding: 12px 16px; display: flex; gap: 8px; }
+.mockup-dot { width: 12px; height: 12px; border-radius: 50%; }
+.mockup-dot.red { background: #f85149; }
+.mockup-dot.yellow { background: #d29922; }
+.mockup-dot.green { background: #3fb950; }
+.mockup-body { display: flex; min-height: 400px; }
+.mockup-sidebar { width: 280px; border-right: 1px solid var(--border); padding: 16px; }
+.mockup-main { flex: 1; padding: 16px; }
+.mockup-msg { margin-bottom: 12px; padding: 10px 14px; border-radius: 8px; font-size: 13px; max-width: 80%; }
+.mockup-msg.user { background: #1f6feb22; margin-left: auto; }
+.mockup-msg.system { background: var(--border); }
+.mockup-msg.assistant { background: var(--surface); border-left: 3px solid var(--accent); }
+.mockup-file { display: flex; align-items: center; gap: 6px; padding: 4px 8px; font-size: 12px; color: var(--muted); }
+.mockup-progress { height: 3px; background: var(--border); margin-bottom: 16px; }
+.mockup-progress .fill { height: 100%; width: 65%; background: var(--accent); }
+
+/* Getting Started */
+.getting-started { padding: 80px 24px; max-width: 800px; margin: 0 auto; }
+.getting-started h2 { text-align: center; font-size: 32px; margin-bottom: 48px; }
+.steps { display: flex; flex-direction: column; gap: 24px; }
+.step { display: flex; gap: 16px; align-items: flex-start; }
+.step-num { background: var(--accent); color: #000; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+.step h3 { font-size: 16px; margin-bottom: 4px; }
+.step p { font-size: 14px; color: var(--muted); line-height: 1.5; }
+.step code { background: var(--surface); padding: 2px 8px; border-radius: 4px; font-family: 'SF Mono', monospace; font-size: 13px; }
+
+/* Footer */
+footer { border-top: 1px solid var(--border); padding: 32px 24px; text-align: center; color: var(--muted); font-size: 13px; }
+footer a { color: var(--accent); }
+
+@media (max-width: 768px) {
+  .hero h1 { font-size: 32px; }
+  .mockup-body { flex-direction: column; }
+  .mockup-sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+  nav ul { display: none; }
+}
+</style>
 </head>
 <body>
-    <header>
-        <h1>Agent Project Builder</h1>
-        <p class="tagline">AI-powered software project generation from natural language</p>
-    </header>
 
-    <section>
-        <h2>What is Agent Project Builder?</h2>
-        <p>
-            Agent Project Builder is an autonomous AI agent system that generates complete software projects from natural language descriptions. 
-            Simply describe what you want to build, and our AI agents will create the project structure, write the code, configure dependencies, 
-            and set up everything you need to get started.
-        </p>
-    </section>
+<nav>
+  <div class="logo">Agent<span>ProjectBuilder</span></div>
+  <ul>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#demo">Demo</a></li>
+    <li><a href="#start">Get Started</a></li>
+    <li><a href="https://github.com/nrupala/agent-project-builder">GitHub</a></li>
+  </ul>
+</nav>
 
-    <section>
-        <h2>Key Features</h2>
-        <div class="feature-grid">
-            <div class="feature-card">
-                <h3>🤖 AI-Powered Generation</h3>
-                <p>Turn natural language descriptions into complete, working software projects using advanced language models.</p>
-            </div>
-            <div class="feature-card">
-                <h3>🔒 100% Local Operation</h3>
-                <p>Run entirely offline using locally stored models from LM Studio or Ollama - no external API calls required.</p>
-            </div>
-            <div class="feature-card">
-                <h3>⚡ Multiple AI Backends</h3>
-                <p>Supports OpenAI (cloud), LM Studio (local), Ollama (local), and VS Code agents for flexible deployment options.</p>
-            </div>
-            <div class="feature-card">
-                <h3>🛠️ Complete Project Generation</h3>
-                <p>Generates full project structures with proper dependencies, configurations, documentation, and build tools.</p>
-            </div>
-            <div class="feature-card">
-                <h3>🧪 Integrated Testing</h3>
-                <p>Automatically runs tests and linting to ensure generated code quality before delivery.</p>
-            </div>
-            <div class="feature-card">
-                <h3>📦 Cross-Platform</h3>
-                <p>Available as standalone executables for Windows, macOS, and Linux, plus Node.js package for developers.</p>
-            </div>
-        </div>
-    </section>
+<section class="hero">
+  <h1>Build Software with<br><span class="gradient">Natural Language</span></h1>
+  <p>Describe your project in plain English. An AI agent analyzes, plans, and generates the complete codebase automatically. Works with local AI models for full privacy.</p>
+  <div class="buttons">
+    <a href="https://github.com/nrupala/agent-project-builder" class="btn btn-primary">View on GitHub</a>
+    <a href="#start" class="btn btn-secondary">Get Started</a>
+  </div>
+</section>
 
-    <section>
-        <h2>Getting Started</h2>
-        <h3>Installation</h3>
-        <pre><code># Clone the repository
-git clone https://github.com/yourusername/agent-project-builder.git
-cd agent-project-builder
+<section class="features" id="features">
+  <h2>Features</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="icon">&#128172;</div>
+      <h3>Natural Language Input</h3>
+      <p>Describe what you want to build in plain English. The AI agent understands requirements and generates a complete project.</p>
+    </div>
+    <div class="card">
+      <div class="icon">&#127760;</div>
+      <h3>Browser-Native GUI</h3>
+      <p>Modern web interface with real-time progress tracking, file tree, code preview, and one-click project download as ZIP.</p>
+    </div>
+    <div class="card">
+      <div class="icon">&#128187;</div>
+      <h3>CLI &amp; Interactive Mode</h3>
+      <p>Full command-line interface for automation, scripting, and CI/CD pipelines. Interactive mode for conversational building.</p>
+    </div>
+    <div class="card">
+      <div class="icon">&#128274;</div>
+      <h3>Local-First AI</h3>
+      <p>Works with LM Studio or Ollama for 100% offline operation. Your code and prompts never leave your machine.</p>
+    </div>
+    <div class="card">
+      <div class="icon">&#128736;</div>
+      <h3>Multi-Agent Architecture</h3>
+      <p>Pluggable agent system with configurable capabilities, tools, and behavior. Create custom agents for specific domains.</p>
+    </div>
+    <div class="card">
+      <div class="icon">&#128270;</div>
+      <h3>Auto Git Integration</h3>
+      <p>Automatic repository initialization, file staging, and meaningful commit messages. Your project is version-controlled from day one.</p>
+    </div>
+  </div>
+</section>
 
-# Install dependencies
-npm install
+<section class="screenshot" id="demo">
+  <h2>See It In Action</h2>
+  <div class="mockup">
+    <div class="mockup-bar">
+      <div class="mockup-dot red"></div>
+      <div class="mockup-dot yellow"></div>
+      <div class="mockup-dot green"></div>
+    </div>
+    <div class="mockup-body">
+      <div class="mockup-sidebar">
+        <div style="font-size:12px;font-weight:600;margin-bottom:12px;color:var(--muted);">Generated Files</div>
+        <div class="mockup-file">&#128193; src/</div>
+        <div class="mockup-file" style="padding-left:20px;">&#128293; index.js</div>
+        <div class="mockup-file" style="padding-left:20px;">&#128293; server.js</div>
+        <div class="mockup-file" style="padding-left:20px;">&#128293; routes.js</div>
+        <div class="mockup-file">&#128230; package.json</div>
+        <div class="mockup-file">&#128221; README.md</div>
+        <div class="mockup-file">&#128270; .gitignore</div>
+      </div>
+      <div class="mockup-main">
+        <div class="mockup-progress"><div class="fill"></div></div>
+        <div class="mockup-msg user">Create a REST API for a blog with Express and MongoDB</div>
+        <div class="mockup-msg system">Analyzing request...</div>
+        <div class="mockup-msg assistant">Planning project structure...</div>
+        <div class="mockup-msg assistant">Generated: <strong>src/index.js</strong></div>
+        <div class="mockup-msg assistant">Generated: <strong>src/server.js</strong></div>
+        <div class="mockup-msg assistant">Generated: <strong>src/routes.js</strong></div>
+        <div class="mockup-msg system">Project complete! 7 files generated.</div>
+      </div>
+    </div>
+  </div>
+</section>
 
-# Configure your environment (create .env file)
-echo "OPENAI_API_KEY=your_key_here" > .env
-# Or for local-only mode:
-echo "LOCAL_ONLY=true" > .env
-echo "MODEL_PROVIDER=lmstudio" >> .env
-</code></pre>
+<section class="getting-started" id="start">
+  <h2>Get Started in 3 Steps</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <h3>Clone &amp; Install</h3>
+        <p><code>git clone https://github.com/nrupala/agent-project-builder.git</code></p>
+        <p><code>cd agent-project-builder && npm install</code></p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <h3>Start the Server</h3>
+        <p><code>npm run server</code></p>
+        <p>Open <a href="http://localhost:3000">http://localhost:3000</a> in your browser</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <h3>Describe &amp; Build</h3>
+        <p>Type your project description and click Build. Watch the AI generate your project in real-time.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-        <h3>Usage Examples</h3>
-        <pre><code># Create a web API from description
-node src/index.js -r "Create a REST API for a blog with Node.js and Express"
+<footer>
+  <p>Built with &#128156; by <a href="https://github.com/nrupala">nrupala</a>. Open source under MIT License.</p>
+  <p style="margin-top:8px;"><a href="https://github.com/nrupala/agent-project-builder">GitHub</a> &middot; <a href="https://github.com/nrupala/agent-project-builder/blob/main/docs/USAGE.md">Documentation</a></p>
+</footer>
 
-# Build a mobile app with local models only
-node src/index.js -r "Create a fitness tracking app with React Native" -a vscode-agent -m ollama -l
-
-# Start interactive mode
-node src/index.js --interactive
-</code></pre>
-    </section>
-
-    <section>
-        <h2>Supported Project Types</h2>
-        <ul>
-            <li><strong>Web Applications:</strong> React, Vue, HTML/CSS/JS, Next.js, etc.</li>
-            <li><strong>APIs and Backends:</strong> Node.js/Express, Python/Flask, Python/FastAPI, Java/Spring, etc.</li>
-            <li><strong>Mobile Applications:</strong> React Native, Ionic, Flutter, etc.</li>
-            <li><strong>Command Line Tools:</strong> Node.js CLI, Python CLI, Rust CLI, etc.</li>
-            <li><strong>Libraries and Packages:</strong> npm packages, Python packages, etc.</li>
-            <li><strong>Data Processing:</strong> ETL pipelines, data analysis scripts, etc.</li>
-            <li><strong>Games:</strong> 2D canvas games, text adventures, etc.</li>
-            <li><strong>DevOps:</strong> Docker configurations, CI/CD pipelines, infrastructure as code, etc.</li>
-        </ul>
-    </section>
-
-    <section>
-        <h2>Download</h2>
-        <p>
-            Get the latest version from the <a href="https://github.com/yourusername/agent-project-builder/releases">GitHub Releases</a> page.
-            Standalone executables are available for Windows, macOS, and Linux.
-        </p>
-        <a href="https://github.com/yourusername/agent-project-builder/releases" class="btn">Download Releases</a>
-    </section>
-
-    <footer class="footer">
-        <p>Built with ❤️ using OpenCode workflow</p>
-        <p>&copy; 2026 Agent Project Builder. MIT Licensed.</p>
-    </footer>
 </body>
 </html>
