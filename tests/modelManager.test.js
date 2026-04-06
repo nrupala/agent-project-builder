@@ -4,27 +4,34 @@ describe('ModelManager', () => {
   let manager;
 
   beforeEach(() => {
+    process.env.USE_BUILTIN_ENGINE = 'false';
     manager = new ModelManager();
+  });
+
+  afterEach(() => {
+    delete process.env.USE_BUILTIN_ENGINE;
+    delete process.env.MODEL_PROVIDER;
+    delete process.env.LOCAL_ONLY;
   });
 
   test('should create instance with defaults', () => {
     expect(manager.provider).toBeNull();
     expect(manager.isLocalOnly).toBe(false);
     expect(manager.clients).toBeInstanceOf(Map);
+    expect(manager.builtInEngine).toBeDefined();
+    expect(manager.maxConcurrentRequests).toBe(20);
   });
 
   test('should detect local-only mode from env', async () => {
     process.env.LOCAL_ONLY = 'true';
     await manager.initialize();
     expect(manager.isLocalOnly).toBe(true);
-    delete process.env.LOCAL_ONLY;
   });
 
   test('should detect local-only mode from lmstudio provider', async () => {
     process.env.MODEL_PROVIDER = 'lmstudio';
     await manager.initialize();
     expect(manager.isLocalOnly).toBe(true);
-    delete process.env.MODEL_PROVIDER;
   });
 
   test('should get model config from env for lmstudio', async () => {
@@ -34,9 +41,6 @@ describe('ModelManager', () => {
     const config = await manager.getModelConfigFromEnv();
     expect(config.provider).toBe('lmstudio');
     expect(config.model).toBe('test-model');
-    delete process.env.MODEL_PROVIDER;
-    delete process.env.LMSTUDIO_MODEL;
-    delete process.env.LMSTUDIO_ENDPOINT;
   });
 
   test('should get model config from env for ollama', async () => {
@@ -45,8 +49,6 @@ describe('ModelManager', () => {
     const config = await manager.getModelConfigFromEnv();
     expect(config.provider).toBe('ollama');
     expect(config.model).toBe('llama3');
-    delete process.env.MODEL_PROVIDER;
-    delete process.env.OLLAMA_MODEL;
   });
 
   test('should get model config from env for openai', async () => {
@@ -55,22 +57,33 @@ describe('ModelManager', () => {
     const config = await manager.getModelConfigFromEnv();
     expect(config.provider).toBe('openai');
     expect(config.model).toBe('gpt-4');
-    delete process.env.MODEL_PROVIDER;
-    delete process.env.OPENAI_MODEL;
   });
 
   test('should use defaults when no env vars set', async () => {
     const config = await manager.getModelConfigFromEnv();
-    expect(config.provider).toBe('openai');
+    expect(config.provider).toBe('lmstudio');
     expect(config.temperature).toBe(0.7);
-    expect(config.maxTokens).toBe(2000);
+    expect(config.maxTokens).toBe(4096);
   });
 
-  test('should fallback to mock client when provider fails', async () => {
+  test('should fallback to raw-http when openai key is missing', async () => {
     process.env.MODEL_PROVIDER = 'openai';
     delete process.env.OPENAI_API_KEY;
     await manager.setProvider('openai', { provider: 'openai', model: 'gpt-3.5-turbo' });
-    expect(manager.clients.has('mock')).toBe(true);
-    delete process.env.MODEL_PROVIDER;
+    expect(manager.clientType).toBe('raw-http');
+  });
+
+  test('should have concurrency control', async () => {
+    expect(manager.maxConcurrentRequests).toBe(20);
+    expect(manager.activeRequests).toBe(0);
+    expect(manager.requestQueue).toEqual([]);
+  });
+
+  test('should return stats', async () => {
+    const stats = manager.getStats();
+    expect(stats).toHaveProperty('provider');
+    expect(stats).toHaveProperty('clientType');
+    expect(stats).toHaveProperty('maxConcurrentRequests');
+    expect(stats.maxConcurrentRequests).toBe(20);
   });
 });

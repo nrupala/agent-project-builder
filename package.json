@@ -1,1 +1,23 @@
-Mock AI response for testing purposes
+{
+  "name": "agent-project-builder",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "node-llama-cpp": "^3.0.0",
+    "@huggingface/transformers": "^3.0.0",
+    "openai": "^4.0.0",
+    "axios": "^1.6.0",
+    "fs-extra": "^11.0.0",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "nodemon": "^3.0.0"
+  }
+}
