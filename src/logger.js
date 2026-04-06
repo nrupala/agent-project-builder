@@ -7,25 +7,25 @@ export class Logger {
 
   info(message) {
     if (this.enabled && this.level !== 'error') {
-      console.log(`${this.prefix} INFO: ${message}`);
+      console.log(this.prefix + ' INFO: ' + message);
     }
   }
 
   warn(message) {
     if (this.enabled && (this.level === 'info' || this.level === 'warn')) {
-      console.warn(`${this.prefix} WARN: ${message}`);
+      console.warn(this.prefix + ' WARN: ' + message);
     }
   }
 
   error(message) {
     if (this.enabled) {
-      console.error(`${this.prefix} ERROR: ${message}`);
+      console.error(this.prefix + ' ERROR: ' + message);
     }
   }
 
   debug(message) {
     if (this.enabled && this.level === 'debug') {
-      console.log(`${this.prefix} DEBUG: ${message}`);
+      console.log(this.prefix + ' DEBUG: ' + message);
     }
   }
 }

@@ -1,8 +1,8 @@
 export class PromptEngine {
   constructor() {
     this.logger = {
-      info: (msg) => console.log(`[PromptEngine] ${msg}`),
-      error: (msg) => console.error(`[PromptEngine] ${msg}`)
+      info: (msg) => console.log('[PromptEngine] ' + msg),
+      error: (msg) => console.error('[PromptEngine] ' + msg)
     };
   }
 

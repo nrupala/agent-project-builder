@@ -21,7 +21,7 @@ export class AgentOrchestrator {
   }
 
   async processRequest(request, options = {}) {
-    this.logger.info(`Processing request: ${request}`);
+    this.logger.info('Processing request: ' + request);
 
     const agentType = options.agentType || 'default';
     const modelProvider = options.modelProvider || 'lmstudio';

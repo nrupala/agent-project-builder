@@ -12,103 +12,120 @@ export class ModelSelector {
     this.modelRegistry.set('code-generation', [
       {
         id: 'qwen2.5-coder-7b-instruct',
-        name: 'Qwen2.5 Coder 7B Instruct',
-        url: 'https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf',
-        filename: 'qwen2.5-coder-7b-instruct-q4_k_m.gguf',
+        name: 'Qwen2.5 Coder 7B Instruct (lmstudio-community)',
+        url: 'https://huggingface.co/lmstudio-community/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf',
+        filename: 'Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf',
         quantization: 'Q4_K_M',
         params: '7B',
         vramRequired: 5.5,
         quality: 'high',
         specialty: 'code-generation',
-        fallback: 'https://huggingface.co/mradermacher/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct.Q4_K_M.gguf'
+        fallback: 'https://huggingface.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf'
       },
       {
         id: 'qwen2.5-coder-3b-instruct',
-        name: 'Qwen2.5 Coder 3B Instruct',
-        url: 'https://huggingface.co/Qwen/Qwen2.5-Coder-3B-Instruct-GGUF/resolve/main/qwen2.5-coder-3b-instruct-q4_k_m.gguf',
-        filename: 'qwen2.5-coder-3b-instruct-q4_k_m.gguf',
+        name: 'Qwen2.5 Coder 3B Instruct (lmstudio-community)',
+        url: 'https://huggingface.co/lmstudio-community/Qwen2.5-Coder-3B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-3B-Instruct-Q4_K_M.gguf',
+        filename: 'Qwen2.5-Coder-3B-Instruct-Q4_K_M.gguf',
         quantization: 'Q4_K_M',
         params: '3B',
         vramRequired: 2.5,
         quality: 'medium',
         specialty: 'code-generation',
-        fallback: 'https://huggingface.co/mradermacher/Qwen2.5-Coder-3B-Instruct-GGUF/resolve/main/qwen2.5-coder-3b-instruct.Q4_K_M.gguf'
+        fallback: 'https://huggingface.co/bartowski/Qwen2.5-Coder-3B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-3B-Instruct-Q4_K_M.gguf'
       },
       {
         id: 'qwen2.5-coder-1.5b-instruct',
-        name: 'Qwen2.5 Coder 1.5B Instruct',
-        url: 'https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF/resolve/main/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf',
-        filename: 'qwen2.5-coder-1.5b-instruct-q4_k_m.gguf',
+        name: 'Qwen2.5 Coder 1.5B Instruct (lmstudio-community)',
+        url: 'https://huggingface.co/lmstudio-community/Qwen2.5-Coder-1.5B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf',
+        filename: 'Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf',
         quantization: 'Q4_K_M',
         params: '1.5B',
         vramRequired: 1.2,
         quality: 'low',
         specialty: 'code-generation',
-        fallback: 'https://huggingface.co/mradermacher/Qwen2.5-Coder-1.5B-Instruct-GGUF/resolve/main/qwen2.5-coder-1.5b-instruct.Q4_K_M.gguf'
+        fallback: 'https://huggingface.co/bartowski/Qwen2.5-Coder-1.5B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf'
+      },
+      {
+        id: 'qwen2.5-coder-0.5b-instruct',
+        name: 'Qwen2.5 Coder 0.5B Instruct (lmstudio-community)',
+        url: 'https://huggingface.co/lmstudio-community/Qwen2.5-Coder-0.5B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-0.5B-Instruct-Q8_0.gguf',
+        filename: 'Qwen2.5-Coder-0.5B-Instruct-Q8_0.gguf',
+        quantization: 'Q8_0',
+        params: '0.5B',
+        vramRequired: 0.8,
+        quality: 'minimal',
+        specialty: 'code-generation',
+        fallback: 'https://huggingface.co/bartowski/Qwen2.5-Coder-0.5B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-0.5B-Instruct-Q8_0.gguf'
       }
     ]);
 
     this.modelRegistry.set('general-chat', [
       {
         id: 'llama-3.2-3b-instruct',
-        name: 'Llama 3.2 3B Instruct',
-        url: 'https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf',
+        name: 'Llama 3.2 3B Instruct (lmstudio-community)',
+        url: 'https://huggingface.co/lmstudio-community/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf',
         filename: 'Llama-3.2-3B-Instruct-Q4_K_M.gguf',
         quantization: 'Q4_K_M',
         params: '3B',
         vramRequired: 2.5,
         quality: 'medium',
-        specialty: 'general-chat'
+        specialty: 'general-chat',
+        fallback: 'https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf'
       },
       {
         id: 'qwen2.5-7b-instruct',
-        name: 'Qwen2.5 7B Instruct',
-        url: 'https://huggingface.co/Qwen/Qwen2.5-7B-Instruct-GGUF/resolve/main/qwen2.5-7b-instruct-q4_k_m.gguf',
-        filename: 'qwen2.5-7b-instruct-q4_k_m.gguf',
+        name: 'Qwen2.5 7B Instruct (lmstudio-community)',
+        url: 'https://huggingface.co/lmstudio-community/Qwen2.5-7B-Instruct-GGUF/resolve/main/Qwen2.5-7B-Instruct-Q4_K_M.gguf',
+        filename: 'Qwen2.5-7B-Instruct-Q4_K_M.gguf',
         quantization: 'Q4_K_M',
         params: '7B',
         vramRequired: 5.5,
         quality: 'high',
-        specialty: 'general-chat'
+        specialty: 'general-chat',
+        fallback: 'https://huggingface.co/bartowski/Qwen2.5-7B-Instruct-GGUF/resolve/main/Qwen2.5-7B-Instruct-Q4_K_M.gguf'
       }
     ]);
 
     this.modelRegistry.set('reasoning', [
       {
         id: 'qwen2.5-coder-7b-instruct',
-        name: 'Qwen2.5 Coder 7B Instruct',
-        url: 'https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf',
-        filename: 'qwen2.5-coder-7b-instruct-q4_k_m.gguf',
+        name: 'Qwen2.5 Coder 7B Instruct (lmstudio-community)',
+        url: 'https://huggingface.co/lmstudio-community/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf',
+        filename: 'Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf',
         quantization: 'Q4_K_M',
         params: '7B',
         vramRequired: 5.5,
         quality: 'high',
-        specialty: 'reasoning'
+        specialty: 'reasoning',
+        fallback: 'https://huggingface.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf'
       },
       {
         id: 'deepseek-r1-distill-qwen-7b',
-        name: 'DeepSeek R1 Distill Qwen 7B',
-        url: 'https://huggingface.co/bartowski/DeepSeek-R1-Distill-Qwen-7B-GGUF/resolve/main/DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf',
+        name: 'DeepSeek R1 Distill Qwen 7B (lmstudio-community)',
+        url: 'https://huggingface.co/lmstudio-community/DeepSeek-R1-Distill-Qwen-7B-GGUF/resolve/main/DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf',
         filename: 'DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf',
         quantization: 'Q4_K_M',
         params: '7B',
         vramRequired: 5.5,
         quality: 'high',
-        specialty: 'reasoning'
+        specialty: 'reasoning',
+        fallback: 'https://huggingface.co/bartowski/DeepSeek-R1-Distill-Qwen-7B-GGUF/resolve/main/DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf'
       }
     ]);
 
     this.modelRegistry.set('embedding', [
       {
         id: 'nomic-embed-text-v1.5',
-        name: 'Nomic Embed Text v1.5',
-        url: 'https://huggingface.co/nomic-ai/nomic-embed-text-v1.5-GGUF/resolve/main/nomic-embed-text-v1.5.Q4_K_M.gguf',
-        filename: 'nomic-embed-text-v1.5.Q4_K_M.gguf',
+        name: 'Nomic Embed Text v1.5 (lmstudio-community)',
+        url: 'https://huggingface.co/lmstudio-community/nomic-embed-text-v1.5-GGUF/resolve/main/nomic-embed-text-v1.5-Q4_K_M.gguf',
+        filename: 'nomic-embed-text-v1.5-Q4_K_M.gguf',
         quantization: 'Q4_K_M',
         params: '137M',
         vramRequired: 0.3,
         quality: 'high',
-        specialty: 'embedding'
+        specialty: 'embedding',
+        fallback: 'https://huggingface.co/nomic-ai/nomic-embed-text-v1.5-GGUF/resolve/main/nomic-embed-text-v1.5.Q4_K_M.gguf'
       }
     ]);
   }
