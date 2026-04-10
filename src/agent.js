@@ -1,0 +1,181 @@
+import { Logger } from './logger.js';
+import { ModelManager } from './modelManager.js';
+import { ConfigManager } from './configManager.js';
+import { GitManager } from './gitManager.js';
+import { FileManager } from './fileManager.js';
+import { PromptEngine } from './promptEngine.js';
+
+export class Agent {
+  constructor({ type, modelProvider, configManager, modelManager, logger, gitManager, outputDir }) {
+    this.type = type;
+    this.modelProvider = modelProvider;
+    this.configManager = configManager;
+    this.modelManager = modelManager;
+    this.logger = logger;
+    this.gitManager = gitManager;
+    this.fileManager = new FileManager(outputDir || 'output');
+    this.promptEngine = new PromptEngine();
+    this.config = null;
+    this.onProgress = null;
+    this.onFileGenerated = null;
+    this.outputDir = outputDir || 'output';
+  }
+
+  async initialize() {
+    this.logger.info(`Initializing ${this.type} agent with ${this.modelProvider} provider`);
+    this.config = await this.configManager.getAgentConfig(this.type);
+    
+    const modelConfig = { ...this.config.model };
+    
+    if (this.modelProvider === 'lmstudio') {
+      modelConfig.endpoint = process.env.LMSTUDIO_ENDPOINT || 'http://localhost:1234/v1';
+      modelConfig.model = process.env.LMSTUDIO_MODEL || modelConfig.model;
+      modelConfig.apiKey = process.env.LMSTUDIO_API_KEY || 'not-needed';
+    } else if (this.modelProvider === 'ollama') {
+      modelConfig.endpoint = process.env.OLLAMA_ENDPOINT || 'http://localhost:11434';
+      modelConfig.model = process.env.OLLAMA_MODEL || modelConfig.model;
+    } else if (this.modelProvider === 'openai') {
+      modelConfig.apiKey = process.env.OPENAI_API_KEY;
+      modelConfig.model = process.env.OPENAI_MODEL || modelConfig.model;
+    }
+    
+    await this.modelManager.setProvider(this.modelProvider, modelConfig);
+    this.logger.info('Agent initialized successfully');
+  }
+
+  setCallbacks({ onProgress, onFileGenerated } = {}) {
+    this.onProgress = onProgress || null;
+    this.onFileGenerated = onFileGenerated || null;
+  }
+
+  emitProgress(phase, message) {
+    if (this.onProgress) this.onProgress(phase, message);
+  }
+
+  emitFileGenerated(path, content) {
+    if (this.onFileGenerated) this.onFileGenerated(path, content);
+  }
+
+  async buildProject(request, options = {}) {
+    this.logger.info(`Building project for request: ${request}`);
+
+    const analysis = await this.analyzeRequest(request, options);
+    const plan = await this.planProject(analysis, options);
+    const result = await this.executePlan(plan, options);
+    await this.finalizeProject(result, options);
+
+    return result;
+  }
+
+  async analyzeRequest(request, options) {
+    this.logger.info('Analyzing user request');
+    this.emitProgress('analysis', 'Analyzing request...');
+
+    const prompt = this.promptEngine.createAnalysisPrompt(request, options);
+    const response = await this.modelManager.generateCompletion(prompt);
+    return this.parseAnalysis(response);
+  }
+
+  async planProject(analysis, options) {
+    this.logger.info('Planning project structure');
+    this.emitProgress('planning', 'Planning project structure...');
+
+    const prompt = this.promptEngine.createPlanningPrompt(analysis, options);
+    const response = await this.modelManager.generateCompletion(prompt);
+    return this.parsePlan(response);
+  }
+
+  async executePlan(plan, options) {
+    this.logger.info('Executing project plan');
+    this.emitProgress('execution', 'Generating files...');
+
+    await this.fileManager.createProjectStructure(plan.structure);
+
+    for (const fileSpec of plan.files) {
+      await this.generateFile(fileSpec, options);
+    }
+
+    if (plan.dependencies && plan.dependencies.length > 0) {
+      this.emitProgress('dependencies', 'Installing dependencies...');
+      await this.fileManager.installDependencies(plan.dependencies);
+    }
+
+    await this.fileManager.setupConfigFiles(plan.configs);
+
+    return { plan, status: 'executed' };
+  }
+
+  async generateFile(fileSpec, options) {
+    this.logger.info(`Generating file: ${fileSpec.path}`);
+    this.emitProgress('file', `Generating ${fileSpec.path}...`);
+
+    const prompt = this.promptEngine.createFileGenerationPrompt(fileSpec, options);
+    const content = await this.modelManager.generateCompletion(prompt);
+
+    await this.fileManager.writeFile(fileSpec.path, content);
+    this.emitFileGenerated(fileSpec.path, content);
+  }
+
+  async finalizeProject(result, options) {
+    this.logger.info('Finalizing project');
+    this.emitProgress('finalizing', 'Running tests and linting...');
+
+    if (this.config.behavior.runTests) {
+      await this.fileManager.runTests();
+    }
+
+    if (this.config.behavior.lintBeforeCommit) {
+      await this.fileManager.runLinter();
+    }
+
+    if (this.config.behavior.autoCommit) {
+      await this.gitManager.commitChanges(`feat: ${result.plan.name} project generated by agent`);
+    }
+
+    this.emitProgress('complete', 'Project generation complete!');
+    this.logger.info('Project finalized');
+  }
+
+  parseAnalysis(response) {
+    return {
+      type: 'project',
+      description: response.substring(0, 100),
+      requirements: response.split('\n').filter(line => line.trim().startsWith('-')),
+      technology: this.detectTechnology(response)
+    };
+  }
+
+  detectTechnology(response) {
+    const techMap = {
+      'javascript': ['node', 'js', 'javascript', 'es6'],
+      'typescript': ['typescript', 'ts', 'tsx'],
+      'python': ['python', 'py', 'django', 'flask'],
+      'java': ['java', 'spring', 'maven'],
+      'html': ['html', 'web', 'frontend'],
+      'css': ['css', 'scss', 'sass', 'styling']
+    };
+
+    const lowerResponse = response.toLowerCase();
+    for (const [tech, keywords] of Object.entries(techMap)) {
+      if (keywords.some(keyword => lowerResponse.includes(keyword))) {
+        return tech;
+      }
+    }
+    return 'javascript';
+  }
+
+  parsePlan(response) {
+    return {
+      name: 'generated-project',
+      description: 'Project generated by AI agent',
+      structure: { src: {}, tests: {}, docs: {} },
+      files: [
+        { path: 'src/index.js', type: 'source', description: 'Main entry point' },
+        { path: 'README.md', type: 'documentation', description: 'Project documentation' },
+        { path: 'package.json', type: 'configuration', description: 'Project dependencies and scripts' }
+      ],
+      dependencies: [],
+      configs: {}
+    };
+  }
+}

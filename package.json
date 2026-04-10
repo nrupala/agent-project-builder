@@ -1,0 +1,44 @@
+{
+  "name": "agent-project-builder",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "An automated agent system for building projects based on user requests",
+  "main": "src/index.js",
+  "bin": {
+    "agent-project-builder": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "server": "node src/index.js --server",
+    "dev": "nodemon src/index.js",
+    "dev:server": "nodemon src/index.js --server",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "lint": "eslint src/",
+    "build": "echo 'Build complete'",
+    "download-model": "node scripts/download-model.js"
+  },
+  "keywords": [
+    "agent",
+    "ai",
+    "automation",
+    "code-generation"
+  ],
+  "author": "OpenCode Agent",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "jest": "^29.7.0",
+    "nodemon": "^2.0.0"
+  },
+  "dependencies": {
+    "archiver": "^6.0.0",
+    "axios": "^1.0.0",
+    "commander": "^10.0.0",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.0",
+    "lodash": "^4.0.0",
+    "node-llama-cpp": "^3.18.1",
+    "openai": "^4.0.0",
+    "ws": "^8.16.0"
+  }
+}
