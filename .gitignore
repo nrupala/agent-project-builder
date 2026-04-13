@@ -3,5 +3,7 @@ node_modules/
 *.log
 coverage/
 dist/
+output/
 .DS_Store
 Thumbs.db
+models/*.gguf
