@@ -72,6 +72,7 @@ main { display: flex; flex: 1; overflow: hidden; }
   <span class="badge">v1.0.0</span>
   <div class="status-dot" id="statusDot"></div>
 </header>
+<!-- Session info will be inserted here by JavaScript -->
 
 <main>
   <div class="chat-panel">
@@ -128,6 +129,7 @@ var fileTree = document.getElementById('fileTree');
 var codeViewer = document.getElementById('codeViewer');
 var downloadBtn = document.getElementById('downloadBtn');
 var logsPanel = document.getElementById('logsPanel');
+var sessionInfoDiv = null; // Will hold session info display
 
 var ws = null;
 var currentSession = null;
@@ -135,17 +137,145 @@ var generatedFiles = [];
 var currentTab = 'files';
 var currentFile = null;
 var sessionLogs = [];
+var sessionConfig = {
+  modelProvider: 'lmstudio',
+  agentType: 'default',
+  // Default model configs
+  modelConfig: {
+    lmstudio: {
+      endpoint: 'http://localhost:1234/v1',
+      model: 'lmstudio-community/qwen3-32b',
+      apiKey: 'not-needed'
+    },
+    ollama: {
+      endpoint: 'http://localhost:11434',
+      model: 'llama3'
+    },
+    openai: {
+      model: 'gpt-3.5-turbo',
+      apiKey: null
+    }
+  },
+  resources: {
+    maxTokens: 2000,
+    temperature: 0.7
+  }
+};
+
+// Initialize session on page load
+async function initializeSession() {
+  try {
+    const response = await fetch('/api/session/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(sessionConfig)
+    });
+    
+    const data = await response.json();
+    if (data.sessionId) {
+      currentSession = data.sessionId;
+      showSessionInfo(`Session ID: ${currentSession.substring(0, 8)}...`);
+    } else {
+      throw new Error('Failed to create session');
+    }
+  } catch (error) {
+    console.error('Failed to initialize session:', error);
+    showSessionInfo('Session initialization failed', 'error');
+  }
+}
+
+function showSessionInfo(message, type = 'info') {
+  if (!sessionInfoDiv) {
+    sessionInfoDiv = document.createElement('div');
+    sessionInfoDiv.style.padding = '8px 12px';
+    sessionInfoDiv.style.backgroundColor = type === 'error' ? '#f8514922' : '#1f6feb22';
+    sessionInfoDiv.style.borderLeft = `3px solid ${type === 'error' ? 'var(--red)' : 'var(--accent)'}`;
+    sessionInfoDiv.style.fontSize = '12px';
+    sessionInfoDiv.style.margin = '8px';
+    sessionInfoDiv.style.borderRadius = '4px';
+    const header = document.querySelector('header');
+    header.parentNode.insertBefore(sessionInfoDiv, header.nextSibling);
+  }
+  sessionInfoDiv.textContent = message;
+}
+
+async function updateSessionConfig(field, value) {
+  if (!currentSession) return;
+  
+  try {
+    const updates = {};
+    if (field === 'modelProvider') {
+      updates.modelProvider = value;
+    } else if (field === 'agentType') {
+      updates.agentType = value;
+    }
+    
+    const response = await fetch(`/api/session/${currentSession}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to update session: ${response.statusText}`);
+    }
+    
+    // Update local session config as well
+    if (field === 'modelProvider') {
+      sessionConfig.modelProvider = value;
+    } else if (field === 'agentType') {
+      sessionConfig.agentType = value;
+    }
+    
+    showSessionInfo(`Session updated: ${field} = ${value}`, 'info');
+  } catch (error) {
+    console.error('Failed to update session:', error);
+    showSessionInfo(`Failed to update ${field}`, 'error');
+  }
+}
 
 function connect() {
   var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
   ws = new WebSocket(protocol + '//' + location.host);
-  ws.onopen = function() { statusDot.classList.remove('disconnected'); addMessage('system', 'Connected to Agent server'); };
-  ws.onclose = function() { statusDot.classList.add('disconnected'); addMessage('error', 'Disconnected. Reconnecting...'); setTimeout(connect, 3000); };
+  ws.onopen = function() { 
+    statusDot.classList.remove('disconnected'); 
+    addMessage('system', 'Connected to Agent server');
+    // Ensure session is initialized when connecting
+    if (!currentSession) {
+      initializeSession();
+    }
+  };
+  ws.onclose = function() { 
+    statusDot.classList.add('disconnected'); 
+    addMessage('error', 'Disconnected. Reconnecting...'); 
+    setTimeout(connect, 3000); 
+  };
   ws.onmessage = function(event) {
     var msg = JSON.parse(event.data);
     handleServerMessage(msg);
   };
 }
+
+// Initialize the page
+document.addEventListener('DOMContentLoaded', function() {
+  initializeSession();
+  
+  // Add event listeners for dropdown changes
+  const providerSelect = document.getElementById('providerSelect');
+  const agentSelect = document.getElementById('agentSelect');
+  
+  if (providerSelect) {
+    providerSelect.addEventListener('change', function() {
+      updateSessionConfig('modelProvider', this.value);
+    });
+  }
+  
+  if (agentSelect) {
+    agentSelect.addEventListener('change', function() {
+      updateSessionConfig('agentType', this.value);
+    });
+  }
+});
 
 function addMessage(type, content) {
   var div = document.createElement('div');
@@ -285,6 +415,12 @@ function switchTab(tab) {
 async function sendRequest() {
   var text = inputField.value.trim();
   if (!text) return;
+  if (!currentSession) {
+    addMessage('error', 'No active session. Please refresh the page to initialize a session.');
+    sendBtn.disabled = false;
+    return;
+  }
+  
   inputField.value = '';
   inputField.style.height = '44px';
   addMessage('user', text);
@@ -304,11 +440,12 @@ async function sendRequest() {
       body: JSON.stringify({
         request: text,
         agentType: document.getElementById('agentSelect').value,
-        modelProvider: document.getElementById('providerSelect').value
+        modelProvider: document.getElementById('providerSelect').value,
+        sessionId: currentSession
       })
     });
     var data = await res.json();
-    currentSession = data.sessionId;
+    // currentSession is already set from initialization
   } catch (e) {
     addMessage('error', 'Failed to start build: ' + e.message);
     sendBtn.disabled = false;

@@ -6,3 +6,4 @@ dist/
 output/
 .DS_Store
 Thumbs.db
+models/*.gguf

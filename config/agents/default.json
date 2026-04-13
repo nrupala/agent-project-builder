@@ -1,0 +1,42 @@
+{
+  "name": "Default Agent",
+  "description": "A general-purpose agent for building various types of projects",
+  "behavior": {
+    "autoCommit": true,
+    "lintBeforeCommit": true,
+    "runTests": true,
+    "maxRetries": 3
+  },
+  "model": {
+    "provider": "lmstudio",
+    "model": "lmstudio-community/qwen3-32b",
+    "temperature": 0.7,
+    "maxTokens": 2000
+  },
+  "template": {
+    "structure": {
+      "src": {},
+      "tests": {},
+      "docs": {}
+    },
+    "files": [
+      {
+        "path": "src/index.js",
+        "type": "source",
+        "description": "Main entry point"
+      },
+      {
+        "path": "README.md",
+        "type": "documentation",
+        "description": "Project documentation"
+      },
+      {
+        "path": "package.json",
+        "type": "configuration",
+        "description": "Project dependencies and scripts"
+      }
+    ],
+    "dependencies": [],
+    "configs": {}
+  }
+}
