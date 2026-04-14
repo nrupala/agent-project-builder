@@ -29,14 +29,9 @@ async function main() {
   const request = process.argv[2] || 'Create a simple Node.js Express API with a health check endpoint';
   logger.info('Processing request: ' + request);
 
-  const orchestrator = new AgentOrchestrator({
-    modelManager,
-    configManager,
-    gitManager,
-    logger
-  });
+  const orchestrator = new AgentOrchestrator();
 
-  orchestrator.setCallbacks({
+  const result = await orchestrator.processRequest(request, {
     onProgress: (phase, message) => {
       logger.info('[' + phase + '] ' + message);
     },
@@ -44,8 +39,6 @@ async function main() {
       logger.info('Generated: ' + path);
     }
   });
-
-  const result = await orchestrator.orchestrateBuild(request);
   logger.info('Build complete: ' + JSON.stringify(result, null, 2));
 }
 

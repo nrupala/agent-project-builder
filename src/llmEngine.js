@@ -18,6 +18,10 @@ export class LlmEngine {
     this.transformerPipeline = null;
     this.modelSelector = new ModelSelector();
     this.modelsDir = path.join(__dirname, '..', 'models');
+    this.localModelPaths = [
+      'C:\\Users\\HomeUser\\.lmstudio\\models',
+      path.join(__dirname, '..', 'models')
+    ];
     this.logger = {
       info: (msg) => console.log('[LlmEngine] ' + msg),
       error: (msg) => console.error('[LlmEngine] ' + msg),
@@ -27,6 +31,22 @@ export class LlmEngine {
     this.stats = { totalRequests: 0, cacheHits: 0, avgResponseTime: 0 };
     this.responseCache = new Map();
     this.maxCacheSize = 100;
+  }
+
+  findLocalGGUF(preferredName = 'qwen') {
+    for (const dir of this.localModelPaths) {
+      if (!fs.existsSync(dir)) continue;
+      try {
+        const files = fs.readdirSync(dir, { recursive: true });
+        for (const f of files) {
+          const filePath = path.join(dir, String(f));
+          if (String(f).toLowerCase().includes(preferredName.toLowerCase()) && String(f).endsWith('.gguf')) {
+            return filePath;
+          }
+        }
+      } catch (e) { /* ignore */ }
+    }
+    return null;
   }
 
   async initialize(options = {}) {
@@ -94,7 +114,14 @@ export class LlmEngine {
   }
 
   async _downloadModel(modelInfo) {
-    const modelPath = path.join(this.modelsDir, modelInfo.filename);
+    const localGGUF = this.findLocalGGUF(modelInfo.id || modelInfo.name?.toLowerCase() || 'qwen');
+    if (localGGUF) {
+      this.logger.info(`Using local GGUF: ${localGGUF}`);
+      return localGGUF;
+    }
+
+    const modelFilename = modelInfo.filename || modelInfo.name?.replace(/\s+/g, '-').toLowerCase() + '.gguf';
+    const modelPath = this.modelSelector.findLocalModel('qwen') || path.join(this.modelsDir, modelFilename);
 
     if (fs.existsSync(modelPath)) {
       const stats = fs.statSync(modelPath);
@@ -173,7 +200,8 @@ export class LlmEngine {
 
     this.context = await this.model.createContext({
       sequences: 1,
-      contextSize: Math.min(8192, this.model.contextSize)
+      contextSize: Math.min(4096, this.model.contextSize),
+      batchSize: 512
     });
 
     this.session = new LlamaChatSession({

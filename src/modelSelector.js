@@ -1,14 +1,48 @@
 import os from 'os';
+import path from 'path';
+import fs from 'fs';
 import { execSync } from 'child_process';
+
+const LM_STUDIO_PATH = 'C:\\Users\\HomeUser\\.lmstudio\\models';
+const LOCAL_MODELS_PATH = process.cwd() + '\\models';
 
 export class ModelSelector {
   constructor() {
     this.hardwareProfile = null;
     this.modelRegistry = new Map();
+    this.localModelPaths = [
+      { path: LM_STUDIO_PATH, name: 'LM Studio' },
+      { path: LOCAL_MODELS_PATH, name: 'Local' }
+    ];
     this._buildModelRegistry();
   }
 
+  findLocalModel(nameOrPath) {
+    for (const dir of this.localModelPaths) {
+      if (!fs.existsSync(dir.path)) continue;
+      const files = fs.readdirSync(dir.path, { recursive: true });
+      for (const f of files) {
+        if (String(f).toLowerCase().includes(nameOrPath.toLowerCase()) && String(f).endsWith('.gguf')) {
+          return path.join(dir.path, String(f));
+        }
+      }
+    }
+    return null;
+  }
+
   _buildModelRegistry() {
+    const lmStudioPath = 'C:\\Users\\HomeUser\\.lmstudio\\models';
+    
+    const localModels = [
+      { id: 'qwen2.5-coder-14b', name: 'Qwen2.5 Coder 14B', path: 'lmstudio-community\\Qwen2.5-Coder-14B-Instruct-GGUF\\Qwen2.5-Coder-14B-Instruct-Q3_K_L.gguf', params: '14B', vramRequired: 8, quality: 'high', specialty: 'code-generation' },
+      { id: 'qwen2.5-coder-7b', name: 'Qwen2.5 Coder 7B', path: 'Qwen\\Qwen2.5-Coder-7B-Instruct-GGUF\\qwen2.5-coder-7b-instruct-q4_k_m.gguf', params: '7B', vramRequired: 5, quality: 'high', specialty: 'code-generation' },
+      { id: 'rnj-1-instruct', name: 'RNJ-1 Instruct', path: 'lmstudio-community\\rnj-1-instruct-GGUF\\rnj-1-instruct-Q4_K_M.gguf', params: '7B', vramRequired: 5, quality: 'medium', specialty: 'code-generation' },
+      { id: 'deepseek-r1-8b', name: 'DeepSeek R1 8B', path: 'lmstudio-community\\DeepSeek-R1-0528-Qwen3-8B-GGUF\\DeepSeek-R1-0528-Qwen3-8B-Q4_K_M.gguf', params: '8B', vramRequired: 6, quality: 'high', specialty: 'reasoning' },
+      { id: 'ministral-3b', name: 'Ministral 3B', path: 'lmstudio-community\\Ministral-3-3B-Instruct-2512-GGUF\\Ministral-3-3B-Instruct-2512-Q4_K_M.gguf', params: '3B', vramRequired: 3, quality: 'medium', specialty: 'general-chat' },
+      { id: 'qwen3-coder-next', name: 'Qwen3 Coder Next', path: 'bartowski\\Qwen_Qwen3-Coder-Next-GGUF\\Qwen_Qwen3-Coder-Next-imatrix.gguf', params: '14B', vramRequired: 8, quality: 'high', specialty: 'code-generation' }
+    ];
+
+    this.modelRegistry.set('local', localModels);
     this.modelRegistry.set('code-generation', [
       {
         id: 'qwen2.5-coder-7b-instruct',
@@ -176,6 +210,18 @@ export class ModelSelector {
 
   async selectModel(task = 'code-generation', quality = 'auto') {
     const hardware = await this.detectHardware();
+    
+    const localModels = this.modelRegistry.get('local') || [];
+    if (localModels.length > 0) {
+      const lmStudioPath = 'C:\\Users\\HomeUser\\.lmstudio\\models';
+      for (const model of localModels) {
+        const fullPath = path.join(lmStudioPath, model.path);
+        if (fs.existsSync(fullPath)) {
+          return { ...model, path: fullPath, local: true, hardwareProfile: hardware };
+        }
+      }
+    }
+    
     const models = this.modelRegistry.get(task) || this.modelRegistry.get('code-generation');
 
     let qualityFilter;
