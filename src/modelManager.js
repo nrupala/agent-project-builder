@@ -22,6 +22,17 @@ export class ModelManager {
     };
   }
 
+  async checkVRAM() {
+    try {
+      const task = process.env.LLM_TASK || 'code-generation';
+      const quality = process.env.LLM_QUALITY || 'auto';
+      await this.builtInEngine.initialize({ task, quality, checkOnly: true });
+      return this.builtInEngine.hasGPU;
+    } catch (e) {
+      return false;
+    }
+  }
+
   async initialize() {
     this.isLocalOnly = process.env.LOCAL_ONLY === 'true' ||
                        (process.env.MODEL_PROVIDER &&
@@ -31,22 +42,29 @@ export class ModelManager {
       this.logger.info('Running in local-only mode - no external API calls will be made');
     }
 
-    const useBuiltIn = process.env.USE_BUILTIN_ENGINE !== 'false';
-    this.useBuiltInEngine = useBuiltIn;
+    const hasVRAM = await this.checkVRAM();
+    
+    if (hasVRAM) {
+      this.logger.info('VRAM detected - using built-in LLM engine');
+      const useBuiltIn = process.env.USE_BUILTIN_ENGINE !== 'false';
+      this.useBuiltInEngine = useBuiltIn;
 
-    if (this.useBuiltInEngine) {
-      try {
-        const task = process.env.LLM_TASK || 'code-generation';
-        const quality = process.env.LLM_QUALITY || 'auto';
-        await this.builtInEngine.initialize({ task, quality });
-        this.provider = 'builtin';
-        this.clientType = 'llm-engine';
-        this.logger.info('Built-in LLM engine initialized as primary provider');
-        return;
-      } catch (e) {
-        this.logger.warn('Built-in engine failed to initialize: ' + e.message);
-        this.logger.info('Falling back to external providers...');
+      if (this.useBuiltInEngine) {
+        try {
+          const task = process.env.LLM_TASK || 'code-generation';
+          const quality = process.env.LLM_QUALITY || 'auto';
+          await this.builtInEngine.initialize({ task, quality });
+          this.provider = 'builtin';
+          this.clientType = 'llm-engine';
+          this.logger.info('Built-in LLM engine initialized as primary provider (GPU mode)');
+          return;
+        } catch (e) {
+          this.logger.warn('Built-in engine failed: ' + e.message);
+          this.logger.info('Falling back to external providers...');
+        }
       }
+    } else {
+      this.logger.info('No VRAM available - using LM Studio/Ollama');
     }
 
     const providerName = process.env.MODEL_PROVIDER || 'lmstudio';
@@ -148,11 +166,74 @@ export class ModelManager {
     }
   }
 
+  async getAvailableModels(provider = 'lmstudio') {
+    const endpoints = {
+      lmstudio: 'http://localhost:1234/v1/models',
+      opencode: 'http://localhost:1234/v1/models',
+      ollama: 'http://localhost:11434/api/tags'
+    };
+    
+    const url = endpoints[provider];
+    if (!url) return [];
+    
+    try {
+      const response = await axios.get(url, { timeout: 5000 });
+      if (provider === 'ollama') {
+        return response.data.models?.map(m => m.name) || [];
+      }
+      return response.data.data?.map(m => m.id) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  async selectBestAvailableModel(provider = 'lmstudio') {
+    const models = await this.getAvailableModels(provider);
+    if (models.length === 0) {
+      return null;
+    }
+    
+    const priorityOrder = [
+      'gemma-3-1b',
+      'lfm2-1.2b',
+      '1b',
+      '2b',
+      '3b',
+      '4b',
+      '7b',
+      'qwen2.5-coder-7b',
+      'qwen3',
+      'deepseek-r1',
+      'phi',
+      'mistral',
+      'codellama',
+      'llama'
+    ];
+    
+    for (const priority of priorityOrder) {
+      const found = models.find(m => m.toLowerCase().includes(priority));
+      if (found) {
+        this.logger.info('Selected model: ' + found + ' (matched: ' + priority + ')');
+        return found;
+      }
+    }
+    
+    this.logger.info('Selected model: ' + models[0] + ' (first available)');
+    return models[0];
+  }
+
   async tryLocalProviders() {
     try {
       const lmstudioBase = this.modelConfig.basePath || 'http://localhost:1234/v1';
       await this.initializeClient('lmstudio', 'not-needed', lmstudioBase);
       this.logger.info('Connected to LM Studio at ' + lmstudioBase);
+      
+      const availableModel = await this.selectBestAvailableModel('lmstudio');
+      if (availableModel) {
+        this.modelConfig.model = availableModel;
+        this.logger.info('Using available model: ' + availableModel);
+      }
+      
       this.provider = 'lmstudio';
       return;
     } catch (e) {
@@ -163,6 +244,12 @@ export class ModelManager {
       const opencodeBase = process.env.OPENCODE_ENDPOINT || 'http://localhost:1234/v1';
       await this.initializeClient('opencode', 'not-needed', opencodeBase);
       this.logger.info('Connected to OpenCode at ' + opencodeBase);
+      
+      const availableModel = await this.selectBestAvailableModel('opencode');
+      if (availableModel) {
+        this.modelConfig.model = availableModel;
+      }
+      
       this.provider = 'opencode';
       return;
     } catch (e) {
@@ -173,6 +260,12 @@ export class ModelManager {
       const ollamaBase = process.env.OLLAMA_ENDPOINT || 'http://localhost:11434/v1';
       await this.initializeClient('ollama', 'not-needed', ollamaBase);
       this.logger.info('Connected to Ollama at ' + ollamaBase);
+      
+      const availableModel = await this.selectBestAvailableModel('ollama');
+      if (availableModel) {
+        this.modelConfig.model = availableModel;
+      }
+      
       this.provider = 'ollama';
       return;
     } catch (e) {

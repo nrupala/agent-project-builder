@@ -3,7 +3,8 @@ import path from 'path';
 import { execSync } from 'child_process';
 
 export class FileManager {
-  constructor() {
+  constructor(options = {}) {
+    this.outputDir = options.outputDir || 'generated';
     this.logger = {
       info: (msg) => console.log('[FileManager] ' + msg),
       error: (msg) => console.error('[FileManager] ' + msg),
@@ -11,9 +12,48 @@ export class FileManager {
     };
   }
 
+  stripMarkdownFences(content) {
+    let cleaned = content;
+    
+    cleaned = cleaned.replace(/^```[\w]*\n/g, '');
+    cleaned = cleaned.replace(/^```$/gm, '');
+    cleaned = cleaned.replace(/```$/gm, '');
+    cleaned = cleaned.replace(/^```[\w]*$/gm, '');
+    
+    cleaned = cleaned.trim();
+    
+    return cleaned;
+  }
+
+  extractJson(content) {
+    let cleaned = this.stripMarkdownFences(content);
+    
+    cleaned = cleaned.replace(/\/\/.*$/gm, '');
+    cleaned = cleaned.replace(/\/\*[\s\S]*?\*\//g, '');
+    
+    cleaned = cleaned.trim();
+    
+    try {
+      return JSON.parse(cleaned);
+    } catch (e) {
+      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        let try2 = jsonMatch[0];
+        try2 = try2.replace(/\/\/.*$/gm, '');
+        try2 = try2.replace(/\/\*[\s\S]*?\*\//g, '');
+        try {
+          return JSON.parse(try2);
+        } catch (e2) {
+          this.logger.warn('Could not extract JSON: ' + e2.message);
+        }
+      }
+    }
+    return null;
+  }
+
   async createProjectStructure(structure, baseDir) {
     this.logger.info('Creating project structure');
-    const root = baseDir || process.cwd();
+    const root = baseDir || path.resolve(process.cwd(), this.outputDir);
 
     for (const [dirName, dirContent] of Object.entries(structure)) {
       const dirPath = path.resolve(root, dirName);
@@ -47,21 +87,32 @@ export class FileManager {
   async writeFile(filePath, content) {
     this.logger.info('Writing file: ' + filePath);
 
-    const fullPath = path.resolve(process.cwd(), filePath);
+    const fullPath = path.resolve(process.cwd(), this.outputDir, filePath);
 
     const dirPath = path.dirname(fullPath);
     if (!fs.existsSync(dirPath)) {
       fs.mkdirSync(dirPath, { recursive: true });
     }
 
-    fs.writeFileSync(fullPath, content, 'utf8');
+    let cleanedContent = content;
+    if (filePath.endsWith('.json')) {
+      const json = this.extractJson(content);
+      if (json) {
+        cleanedContent = JSON.stringify(json, null, 2);
+      }
+    } else {
+      cleanedContent = this.stripMarkdownFences(content);
+    }
+
+    fs.writeFileSync(fullPath, cleanedContent, 'utf8');
     this.logger.info('File written: ' + filePath);
   }
 
-  async readFile(filePath) {
+  async readFile(filePath, useOutputDir = true) {
     this.logger.info('Reading file: ' + filePath);
 
-    const fullPath = path.resolve(process.cwd(), filePath);
+    const basePath = useOutputDir ? path.resolve(process.cwd(), this.outputDir) : process.cwd();
+    const fullPath = path.resolve(basePath, filePath);
 
     if (!fs.existsSync(fullPath)) {
       throw new Error('File not found: ' + filePath);
@@ -91,16 +142,17 @@ export class FileManager {
     }
   }
 
-  async installDependencies(dependencies) {
+  async installDependencies(dependencies, projectDir = null) {
     if (!dependencies || dependencies.length === 0) {
       this.logger.info('No dependencies to install');
       return;
     }
 
-    this.logger.info('Installing dependencies: ' + dependencies.join(', '));
+    const targetDir = projectDir || path.resolve(process.cwd(), this.outputDir);
+    this.logger.info('Installing dependencies in ' + targetDir + ': ' + dependencies.join(', '));
 
     try {
-      const packageJsonPath = path.resolve(process.cwd(), 'package.json');
+      const packageJsonPath = path.resolve(targetDir, 'package.json');
       let packageJson = {};
 
       if (fs.existsSync(packageJsonPath)) {
@@ -118,7 +170,7 @@ export class FileManager {
 
       fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2), 'utf8');
 
-      execSync('npm install', { stdio: 'inherit' });
+      execSync('npm install', { stdio: 'inherit', cwd: targetDir });
 
       this.logger.info('Dependencies installed successfully');
     } catch (error) {
@@ -135,44 +187,46 @@ export class FileManager {
     }
   }
 
-  async runTests() {
-    this.logger.info('Running tests');
+  async runTests(projectDir = null) {
+    const targetDir = projectDir || path.resolve(process.cwd(), this.outputDir);
+    this.logger.info('Running tests in ' + targetDir);
 
     try {
-      const packageJsonPath = path.resolve(process.cwd(), 'package.json');
+      const packageJsonPath = path.resolve(targetDir, 'package.json');
       if (fs.existsSync(packageJsonPath)) {
         const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 
         if (packageJson.scripts && packageJson.scripts.test) {
-          execSync('npm test', { stdio: 'inherit' });
+          execSync('npm test', { stdio: 'inherit', cwd: targetDir });
           this.logger.info('Tests completed');
           return;
         }
       }
 
-      execSync('npx jest', { stdio: 'inherit' });
+      execSync('npx jest', { stdio: 'inherit', cwd: targetDir });
       this.logger.info('Tests completed with Jest');
     } catch (error) {
       this.logger.warn('Tests failed or test runner not found: ' + error.message);
     }
   }
 
-  async runLinter() {
-    this.logger.info('Running linter');
+  async runLinter(projectDir = null) {
+    const targetDir = projectDir || path.resolve(process.cwd(), this.outputDir);
+    this.logger.info('Running linter in ' + targetDir);
 
     try {
-      const packageJsonPath = path.resolve(process.cwd(), 'package.json');
+      const packageJsonPath = path.resolve(targetDir, 'package.json');
       if (fs.existsSync(packageJsonPath)) {
         const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 
         if (packageJson.scripts && packageJson.scripts.lint) {
-          execSync('npm run lint', { stdio: 'inherit' });
+          execSync('npm run lint', { stdio: 'inherit', cwd: targetDir });
           this.logger.info('Linting completed');
           return;
         }
       }
 
-      execSync('npx eslint src/', { stdio: 'inherit' });
+      execSync('npx eslint src/', { stdio: 'inherit', cwd: targetDir });
       this.logger.info('Linting completed with ESLint');
     } catch (error) {
       this.logger.warn('Linting failed or linter not found: ' + error.message);

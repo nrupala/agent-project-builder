@@ -32,7 +32,8 @@ export class AgentOrchestrator {
       configManager: this.configManager,
       modelManager: this.modelManager,
       logger: this.logger,
-      gitManager: this.gitManager
+      gitManager: this.gitManager,
+      outputDir: options.outputDir || 'generated'
     });
 
     this.agent.setCallbacks({

@@ -1,3 +1,4 @@
+import path from 'path';
 import { Logger } from './logger.js';
 import { ModelManager } from './modelManager.js';
 import { ConfigManager } from './configManager.js';
@@ -6,18 +7,90 @@ import { FileManager } from './fileManager.js';
 import { PromptEngine } from './promptEngine.js';
 
 export class Agent {
-  constructor({ type, modelProvider, configManager, modelManager, logger, gitManager }) {
+  constructor({ type, modelProvider, configManager, modelManager, logger, gitManager, outputDir, agentId, parentId, role, permissions, sessionId }) {
     this.type = type;
+    this.agentId = agentId || null;
+    this.parentId = parentId || null;
+    this.role = role || 'executor';
+    this.permissions = permissions || {};
+    this.sessionId = sessionId || null;
+    
     this.modelProvider = modelProvider;
     this.configManager = configManager;
     this.modelManager = modelManager;
     this.logger = logger;
     this.gitManager = gitManager;
-    this.fileManager = new FileManager();
+    this.outputDir = outputDir || 'generated';
+    this.fileManager = new FileManager({ outputDir: this.outputDir });
     this.promptEngine = new PromptEngine();
     this.config = null;
     this.onProgress = null;
     this.onFileGenerated = null;
+    this.context = [];
+    this.history = [];
+  }
+
+  canPerform(permission) {
+    return this.permissions[permission] === 'allow';
+  }
+
+  addToContext(message) {
+    this.context.push({ timestamp: Date.now(), ...message });
+    if (this.context.length > 100) {
+      this.context = this.context.slice(-50);
+    }
+  }
+
+  addToHistory(action, result) {
+    this.history.push({ timestamp: Date.now(), action, result });
+  }
+
+  getContext() {
+    return this.context;
+  }
+
+  getHistory() {
+    return this.history;
+  }
+
+  getState() {
+    return {
+      agentId: this.agentId,
+      type: this.type,
+      role: this.role,
+      parentId: this.parentId,
+      sessionId: this.sessionId,
+      contextLength: this.context.length,
+      historyLength: this.history.length,
+      outputDir: this.outputDir
+    };
+  }
+
+  checkPermission(permission) {
+    if (!this.permissions) {
+      this.logger.warn('No permissions configured for agent');
+      return true;
+    }
+    
+    const allowed = this.permissions[permission];
+    if (allowed === 'deny') {
+      this.logger.error(`Permission denied: ${permission} for agent type ${this.type}`);
+      return false;
+    }
+    if (allowed === 'allow') {
+      return true;
+    }
+    if (allowed === 'read') {
+      return permission.includes('read');
+    }
+    this.logger.warn(`Unknown permission action: ${allowed} for ${permission}`);
+    return false;
+  }
+
+  requirePermission(permission) {
+    if (!this.checkPermission(permission)) {
+      throw new Error(`Permission denied: ${permission} not allowed for ${this.type} agent`);
+    }
   }
 
   async initialize() {
@@ -73,6 +146,7 @@ export class Agent {
     this.logger.info('Executing project plan');
     this.emitProgress('execution', 'Generating files...');
 
+    this.requirePermission('file:read');
     await this.fileManager.createProjectStructure(plan.structure);
 
     for (const fileSpec of plan.files) {
@@ -80,6 +154,7 @@ export class Agent {
     }
 
     if (plan.dependencies && plan.dependencies.length > 0) {
+      this.requirePermission('npm:install');
       this.emitProgress('dependencies', 'Installing dependencies...');
       await this.fileManager.installDependencies(plan.dependencies);
     }
@@ -90,6 +165,8 @@ export class Agent {
   }
 
   async generateFile(fileSpec, options) {
+    this.requirePermission('file:write');
+    
     this.logger.info('Generating file: ' + fileSpec.path);
     this.emitProgress('file', 'Generating ' + fileSpec.path + '...');
 
@@ -104,12 +181,16 @@ export class Agent {
     this.logger.info('Finalizing project');
     this.emitProgress('finalizing', 'Running tests and linting...');
 
+    const targetDir = path.resolve(process.cwd(), this.outputDir);
+
     if (this.config.behavior.runTests) {
-      await this.fileManager.runTests();
+      this.requirePermission('bash:execute');
+      await this.fileManager.runTests(targetDir);
     }
 
     if (this.config.behavior.lintBeforeCommit) {
-      await this.fileManager.runLinter();
+      this.requirePermission('bash:execute');
+      await this.fileManager.runLinter(targetDir);
     }
 
     if (this.config.behavior.autoCommit) {

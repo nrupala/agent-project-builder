@@ -4,6 +4,7 @@ node_modules/
 coverage/
 dist/
 output/
+generated/
 .DS_Store
 Thumbs.db
 models/*.gguf

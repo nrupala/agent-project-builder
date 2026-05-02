@@ -55,17 +55,24 @@ export class LlmEngine {
     const task = options.task || 'code-generation';
     const quality = options.quality || process.env.LLM_QUALITY || 'auto';
     const forceBackend = options.forceBackend || process.env.LLM_BACKEND || 'auto';
+    const checkOnly = options.checkOnly || false;
 
     if (!fs.existsSync(this.modelsDir)) {
       fs.mkdirSync(this.modelsDir, { recursive: true });
     }
 
     const selectedModel = await this.modelSelector.selectModel(task, quality);
+    this.hasGPU = selectedModel.willUseGPU;
     this.logger.info(`Selected model: ${selectedModel.name} (${selectedModel.params}, ${selectedModel.quantization})`);
     this.logger.info(`GPU: ${selectedModel.willUseGPU ? 'Yes (' + selectedModel.hardwareProfile.gpu.type + ')' : 'No'} | RAM: ${selectedModel.hardwareProfile.availableRamGB}GB available`);
 
     if (selectedModel.warning) {
       this.logger.warn(selectedModel.warning);
+    }
+
+    if (checkOnly) {
+      this.logger.info('Check-only mode: GPU detection complete');
+      return this.hasGPU;
     }
 
     this.currentModel = selectedModel;
