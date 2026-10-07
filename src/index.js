@@ -15,7 +15,34 @@ import { BuiltInAgents, getAgentConfig } from './agentRegistry.js';
 const logger = new Logger();
 const directoryManager = new DirectoryManager();
 
+function printHelp() {
+  console.log(`Agent Project Builder
+
+Usage:
+  node src/index.js [options] [request]
+
+Options:
+  --agent <type> <request>  Run a single agent of the given type on the request
+  --multi [request]        Run the multi-agent plan/build/review demonstration
+  --parallel [request]     Run explore/research/docs agents in parallel
+  --server                 Start the HTTP server mode
+  -h, --help               Show this help message and exit
+
+Without options, <request> is processed as a build request
+(default: "Create a simple Node.js Express API with a health check endpoint").`);
+}
+
 async function main() {
+  const args = process.argv.slice(2);
+
+  // Handle --help before any initialization: printing usage must never
+  // trigger the agent pipeline (it hangs on some platforms waiting on
+  // model backends that are never needed for help output).
+  if (args[0] === '--help' || args[0] === '-h' || args.includes('--help') || args.includes('-h')) {
+    printHelp();
+    return;
+  }
+
   logger.info('Agent Project Builder starting...');
   logger.info('Workspace: ' + directoryManager.getWorkspace());
   logger.info('Output: ' + directoryManager.getOutputDir());
@@ -35,7 +62,6 @@ async function main() {
   logger.info('Client type: ' + modelStats.clientType);
   logger.info('Built-in engine: ' + (modelStats.builtInEngine ? modelStats.builtInEngine.backend : 'disabled'));
 
-  const args = process.argv.slice(2);
   let agentType = 'build';
   let request = '';
 
