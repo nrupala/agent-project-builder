@@ -12,7 +12,7 @@ export class Agent {
     this.agentId = agentId || null;
     this.parentId = parentId || null;
     this.role = role || 'executor';
-    this.permissions = permissions || {};
+    this.permissions = permissions || null;
     this.sessionId = sessionId || null;
     
     this.modelProvider = modelProvider;
@@ -31,7 +31,7 @@ export class Agent {
   }
 
   canPerform(permission) {
-    return this.permissions[permission] === 'allow';
+    return !!this.permissions && this.permissions[permission] === 'allow';
   }
 
   addToContext(message) {

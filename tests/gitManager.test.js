@@ -8,14 +8,17 @@ import { execSync } from 'child_process';
 describe('GitManager', () => {
   let gm;
   let testDir;
+  let originalCwd;
 
   beforeEach(() => {
+    originalCwd = process.cwd();
     gm = new GitManager();
     testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'apb-git-test-'));
     process.chdir(testDir);
   });
 
   afterEach(() => {
+    process.chdir(originalCwd);
     fs.rmSync(testDir, { recursive: true, force: true });
   });
 
