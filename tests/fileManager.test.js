@@ -6,14 +6,17 @@ import os from 'os';
 describe('FileManager', () => {
   let fm;
   let testDir;
+  let originalCwd;
 
   beforeEach(() => {
-    fm = new FileManager();
+    originalCwd = process.cwd();
+    fm = new FileManager({ outputDir: '.' });
     testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'apb-test-'));
     process.chdir(testDir);
   });
 
   afterEach(() => {
+    process.chdir(originalCwd);
     fs.rmSync(testDir, { recursive: true, force: true });
   });
 
