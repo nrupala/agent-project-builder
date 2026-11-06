@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
@@ -47,7 +47,7 @@ export class GitManager {
       execSync('git add .', { stdio: 'ignore' });
       const status = execSync('git status --porcelain', { encoding: 'utf8' });
       if (status.trim()) {
-        execSync('git commit -m "' + message + '"', { stdio: 'ignore' });
+        execFileSync('git', ['commit', '-m', message], { stdio: 'ignore' });
         this.logger.info('Changes committed: ' + message);
       } else {
         this.logger.info('No changes to commit');
@@ -71,7 +71,7 @@ export class GitManager {
   async pushToRemote(remote = 'origin', branch = null) {
     try {
       const targetBranch = branch || await this.getCurrentBranch();
-      execSync('git push ' + remote + ' ' + targetBranch, { stdio: 'ignore' });
+      execFileSync('git', ['push', remote, targetBranch], { stdio: 'ignore' });
       this.logger.info('Pushed to ' + remote + '/' + targetBranch);
     } catch (error) {
       this.logger.error('Failed to push to remote: ' + error.message);

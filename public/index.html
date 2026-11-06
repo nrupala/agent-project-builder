@@ -151,7 +151,7 @@ function addMessage(type, content) {
   var div = document.createElement('div');
   div.className = 'message ' + type;
   var labels = { system: 'System', user: 'You', assistant: 'Agent', error: 'Error' };
-  div.innerHTML = '<div class="label">' + (labels[type] || type) + '</div><div class="content">' + content + '</div>';
+  div.innerHTML = '<div class="label">' + escapeHtml(labels[type] || type) + '</div><div class="content">' + escapeHtml(content) + '</div>';
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }

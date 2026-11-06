@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import archiver from 'archiver';
+import rateLimit from 'express-rate-limit';
 import { AgentOrchestrator } from './agentOrchestrator.js';
 import { Logger } from './logger.js';
 
@@ -33,6 +34,10 @@ class AgentServer {
   }
 
   setupMiddleware() {
+    // Rate limiting for the API surface (CodeQL js/missing-rate-limiting):
+    // generous cap sized for the local single-user UI's polling, far below
+    // scripted-abuse rates.
+    this.app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, limit: 600, standardHeaders: 'draft-8', legacyHeaders: false }));
     this.app.use(express.json({ limit: '10mb' }));
     this.app.use(express.static(path.join(rootDir, 'public')));
   }

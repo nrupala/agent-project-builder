@@ -37,8 +37,10 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Build standalone package
-        run: npm run build
+      # No build step: this project ships its ESM sources directly (the
+      # installer steps below package src/, config/ and public/ as-is).
+      # package.json defines no "build" script; the previous phantom
+      # `npm run build` step failed every release run.
 
       # Linux: Create AppImage via linuxdeploy
       - name: Build Linux installer

@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { Agent } from './agent.js';
 import { ModelManager } from './modelManager.js';
 import { ConfigManager } from './configManager.js';
@@ -7,7 +8,7 @@ import { DirectoryManager } from './directoryManager.js';
 import { BuiltInAgents, getAgentConfig, canDelegateTask } from './agentRegistry.js';
 
 function generateId() {
-  return 'agent-' + Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 9);
+  return 'agent-' + randomUUID();
 }
 
 export class MultiAgentOrchestrator {
