@@ -1,6 +1,7 @@
 # Agent Project Builder
 
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/16400/badge)](https://www.bestpractices.dev/en/projects/16400)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/nrupala/agent-project-builder/badge)](https://scorecard.dev/viewer/?uri=github.com/nrupala/agent-project-builder)
 
 An AI-powered project builder: describe the software you want in plain
 language and a multi-agent pipeline plans it, writes the files, installs
