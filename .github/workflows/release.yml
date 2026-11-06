@@ -102,6 +102,11 @@ jobs:
   release:
     needs: build-installers
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      # Build-provenance attestation (SLSA L2 via Sigstore) for release artifacts
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@v4
 
@@ -109,6 +114,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: dist/
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: 'dist/**/*'
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
