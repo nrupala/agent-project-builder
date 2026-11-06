@@ -1,5 +1,7 @@
 # Agent Project Builder
 
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/16400/badge)](https://www.bestpractices.dev/en/projects/16400)
+
 An AI-powered project builder: describe the software you want in plain
 language and a multi-agent pipeline plans it, writes the files, installs
 dependencies, runs tests and the linter, and commits the result to git.
