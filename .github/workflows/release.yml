@@ -47,10 +47,12 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           mkdir -p dist/AppDir/usr/{bin,lib/agent-project-builder}
+          mkdir -p dist/AppDir/usr/share/{applications,icons/hicolor/512x512/apps}
           cp -r src config public package.json dist/AppDir/usr/lib/agent-project-builder/
           cp dist/AppDir/usr/lib/agent-project-builder/src/index.js dist/AppDir/usr/bin/agent-project-builder
           chmod +x dist/AppDir/usr/bin/agent-project-builder
-          cat > dist/AppDir/agent-project-builder.desktop << 'EOF'
+          cp assets/icon-512.png dist/AppDir/usr/share/icons/hicolor/512x512/apps/agent-project-builder.png
+          cat > dist/AppDir/usr/share/applications/agent-project-builder.desktop << 'EOF'
           [Desktop Entry]
           Name=Agent Project Builder
           Exec=agent-project-builder
@@ -60,7 +62,7 @@ jobs:
           EOF
           curl -LO https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
           chmod +x linuxdeploy-x86_64.AppImage
-          APPIMAGE_EXTRACT_AND_RUN=1 ./linuxdeploy-x86_64.AppImage --appdir dist/AppDir --output appimage
+          ARCH=x86_64 APPIMAGE_EXTRACT_AND_RUN=1 ./linuxdeploy-x86_64.AppImage --appdir dist/AppDir --output appimage
           mv Agent_Project_Builder-*.AppImage dist/agent-project-builder-linux.AppImage
 
       # Windows: Create portable zip + NSIS installer
