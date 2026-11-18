@@ -48,6 +48,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   documented mode for CI runners without FUSE. `src/index.js` gained its
   `#!/usr/bin/env node` shebang — the Linux and macOS packages install it
   as a directly executed file, which cannot run without one.
+- Second v1.0.2 cut (run 44372055232) got past the copy and failed inside
+  appimagetool: "Unable to guess the architecture of the AppDir" — the
+  AppDir holds only JavaScript sources (no ELF binary to guess from), so
+  the Linux step now sets `ARCH=x86_64` as the tool's own error prescribes.
+  The same run showed linuxdeploy could not find the desktop file: it was
+  written to the AppDir root, where linuxdeploy never looks, so no AppRun
+  entry point would have been created. The desktop file now lands in
+  `usr/share/applications/`, and the repo's own `assets/icon-512.png` is
+  installed into the hicolor theme path the desktop file names.
 
 ## [1.0.1] - 2026-11-06
 
