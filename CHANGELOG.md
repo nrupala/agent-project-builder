@@ -7,12 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-11-18
+
 ### Added
 
 - Portfolio certification rollout: real README (the old one was a stub left by
   the self-overwrite bug, see ISSUE_LOG.md), CONTRIBUTING.md with PR-flow
   discipline, this CHANGELOG, NOTICE attribution. Signed-deploy survey: no
   deploy target. License verified: MIT, Copyright 2026 Nrupal Akolkar.
+
+### Fixed
+
+- Release pipeline, and the assetless v1.0.1 release — root cause recorded:
+  the v1.0.1 release run (GitHub Actions run 42252034320, 2026-11-06) failed
+  at the packaging step of the Linux leg; the Windows and macOS legs were
+  cancelled by matrix fail-fast and the release job was skipped, so the
+  v1.0.1 GitHub release published with **no assets attached**, and no v1.0.1
+  artifacts exist. The workflow was repaired later the same day (the phantom
+  build step that failed the run was removed, and build-provenance
+  attestation was added), but it was never re-run. This release is the first
+  cut on the repaired pipeline: the platform artifacts (Linux AppImage,
+  Windows portable zip, macOS tar.gz) are built, provenance-attested and
+  attached by the pipeline itself.
+- Dependency install (`npm ci`) failed on a dead upstream download:
+  `onnxruntime-node` (via `@huggingface/transformers`) fetches its CUDA/GPU
+  binary during install, and Microsoft no longer publishes that asset for
+  v1.21.0 (HTTP 404), which aborted installation entirely — CI's first
+  failure when this release was cut. The repo now carries an `.npmrc`
+  setting the vendor-documented `onnxruntime-node-install-cuda=skip`
+  switch: ONNX Runtime installs in CPU form, which is what CI, the
+  release pipeline and local runs use.
+
+## [1.0.1] - 2026-11-06
+
+### Notes
+
+- Tagged 2026-11-06. The GitHub release carries no assets: its release
+  pipeline run failed before the attach step (root cause and cure recorded
+  under [1.0.2] above). No changelog entry was written at the time; this
+  entry was reconstructed from the tag and release records on 2026-11-18.
 
 ## [1.0.0] - 2026-10-05
 
