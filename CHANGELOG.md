@@ -57,6 +57,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   entry point would have been created. The desktop file now lands in
   `usr/share/applications/`, and the repo's own `assets/icon-512.png` is
   installed into the hicolor theme path the desktop file names.
+- Third v1.0.2 cut (run 44375762600): all three platform builds and the
+  provenance attestation succeeded — the pipeline itself is proven — but
+  the release step globbed the whole downloaded artifact tree
+  (`files: dist/**/*`), so it published the three installers plus 28
+  loose files from inside the packages (AppDir internals, sources,
+  plists) and then failed on a stray upload. That release was deleted
+  unpublished-in-effect and the step now names the three installer files
+  exactly; the attestation subject is narrowed to the same three files,
+  so provenance covers precisely what ships.
 
 ## [1.0.1] - 2026-11-06
 
