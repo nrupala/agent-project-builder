@@ -120,12 +120,18 @@ jobs:
       - name: Attest build provenance
         uses: actions/attest-build-provenance@v2
         with:
-          subject-path: 'dist/**/*'
+          subject-path: |
+            dist/agent-project-builder-linux/agent-project-builder-linux.AppImage
+            dist/agent-project-builder-windows/agent-project-builder-windows.zip
+            dist/agent-project-builder-macos/agent-project-builder-macos.tar.gz
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/**/*
+          files: |
+            dist/agent-project-builder-linux/agent-project-builder-linux.AppImage
+            dist/agent-project-builder-windows/agent-project-builder-windows.zip
+            dist/agent-project-builder-macos/agent-project-builder-macos.tar.gz
           draft: false
           prerelease: false
           generate_release_notes: true
