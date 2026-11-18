@@ -37,6 +37,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   setting the vendor-documented `onnxruntime-node-install-cuda=skip`
   switch: ONNX Runtime installs in CPU form, which is what CI, the
   release pipeline and local runs use.
+- Release packaging steps repaired after the first v1.0.2 tag cut failed
+  (run 44362945349, 2026-11-18; no release was published from that cut and
+  the tag was re-cut on the repaired tree). The Linux step copied sources
+  into a directory it never created (`cp: target ... No such file or
+  directory`); it now creates `usr/lib/agent-project-builder` first. The
+  same step's output move (`mv *.AppImage ...`) would also have matched
+  the linuxdeploy tool's own AppImage; it now moves the generated file by
+  name, and linuxdeploy runs with `APPIMAGE_EXTRACT_AND_RUN=1`, the
+  documented mode for CI runners without FUSE. `src/index.js` gained its
+  `#!/usr/bin/env node` shebang — the Linux and macOS packages install it
+  as a directly executed file, which cannot run without one.
 
 ## [1.0.1] - 2026-11-06
 

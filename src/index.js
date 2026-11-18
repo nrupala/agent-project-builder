@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import 'dotenv/config';
 import { Logger } from './logger.js';
 import { ModelManager } from './modelManager.js';
