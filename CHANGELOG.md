@@ -29,6 +29,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   cut on the repaired pipeline: the platform artifacts (Linux AppImage,
   Windows portable zip, macOS tar.gz) are built, provenance-attested and
   attached by the pipeline itself.
+- Dependency install (`npm ci`) failed on a dead upstream download:
+  `onnxruntime-node` (via `@huggingface/transformers`) fetches its CUDA/GPU
+  binary during install, and Microsoft no longer publishes that asset for
+  v1.21.0 (HTTP 404), which aborted installation entirely — CI's first
+  failure when this release was cut. The repo now carries an `.npmrc`
+  setting the vendor-documented `onnxruntime-node-install-cuda=skip`
+  switch: ONNX Runtime installs in CPU form, which is what CI, the
+  release pipeline and local runs use.
 
 ## [1.0.1] - 2026-11-06
 
