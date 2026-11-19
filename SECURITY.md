@@ -1,21 +1,36 @@
 # Security Policy
 
-## Supported Versions
+## Reporting a vulnerability
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+Report vulnerabilities privately. Use GitHub's private vulnerability
+reporting on this repository (Security tab, "Report a vulnerability"), or
+email **info@aimlds.org** with the subject line
+`SECURITY: agent-project-builder`. Do not open a public issue, discussion
+or pull request for a security report.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+Please include the version or commit, what an attacker can do, the steps
+to reproduce it, and the smallest proof-of-concept input that shows it.
 
-## Reporting a Vulnerability
+## What happens next
 
-Use this section to tell people how to report a vulnerability.
+| Step | Target |
+|---|---|
+| Acknowledgement of your report | within 7 days |
+| First assessment (confirmed, not reproduced, or out of scope) | within 14 days |
+| Fix released for a confirmed issue | within 90 days of confirmation, sooner for critical issues |
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+If a fix needs longer, we tell you why and give a new date.
+
+## Disclosure and credit
+
+We follow coordinated disclosure: please let us ship a fix before you
+publish. After the fix we publish a GitHub security advisory and record
+the fixed version in `CHANGELOG.md`. With your permission we credit you by
+name or handle.
+
+## Supported versions
+
+| Version | Security fixes |
+|---|---|
+| 1.0.x (latest release) and the default branch | Yes |
+| Older versions | No. Upgrade to the latest release |
